@@ -69,7 +69,7 @@ def run_once(settings: ImapSettings) -> int:
             log_json("error", "imap_select_failed", folder=settings.folder)
             return processed
 
-        status, data = imap.search(None, "UNSEEN")
+        status, data = _search_unseen(imap, settings.subject_keyword)
         if status != "OK":
             log_json("error", "imap_search_failed")
             return processed
@@ -80,6 +80,19 @@ def run_once(settings: ImapSettings) -> int:
                 processed += 1
 
     return processed
+
+
+def _search_unseen(imap, subject_keyword: str) -> tuple[str, list[Any]]:
+    keyword = subject_keyword.strip() if subject_keyword else ""
+    if keyword:
+        try:
+            criteria = f'(UNSEEN SUBJECT "{_escape_imap_search(keyword)}")'
+            status, data = imap.search(None, criteria)
+            if status == "OK":
+                return status, data
+        except Exception as exc:
+            log_json("warning", "imap_search_subject_failed", error=str(exc))
+    return imap.search(None, "UNSEEN")
 
 
 def run_forever(settings: ImapSettings) -> None:
@@ -229,6 +242,10 @@ def _decode_subject(raw: str | None) -> str:
         else:
             decoded_parts.append(part)
     return "".join(decoded_parts).strip()
+
+
+def _escape_imap_search(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("\"", "\\\"")
 
 
 def _first_message_bytes(data: list[Any]) -> bytes | None:
