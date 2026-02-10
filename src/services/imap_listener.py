@@ -124,7 +124,7 @@ def _process_message(imap, msg_id: bytes, settings: ImapSettings) -> bool:
 
     if not nombre or not telefono:
         _mark_seen(imap, msg_id)
-        _apply_label(imap, msg_id, settings.label_error)
+        _apply_label(imap, msg_id, settings.label_error, settings.host)
         log_json(
             "warning",
             "lead_parse_failed",
@@ -154,13 +154,13 @@ def _process_message(imap, msg_id: bytes, settings: ImapSettings) -> bool:
 
     if response.status_code == 200:
         _mark_seen(imap, msg_id)
-        _apply_label(imap, msg_id, settings.label_success)
+        _apply_label(imap, msg_id, settings.label_success, settings.host)
         log_json("info", "lead_sent", telefono=telefono, status=response.status_code)
         return True
 
     if response.status_code in {400, 422}:
         _mark_seen(imap, msg_id)
-        _apply_label(imap, msg_id, settings.label_error)
+        _apply_label(imap, msg_id, settings.label_error, settings.host)
         log_json(
             "warning",
             "lead_rejected",
@@ -259,10 +259,27 @@ def _mark_seen(imap, msg_id: bytes) -> None:
     imap.store(msg_id, "+FLAGS", "\\Seen")
 
 
-def _apply_label(imap, msg_id: bytes, label: str | None) -> None:
+def _apply_label(imap, msg_id: bytes, label: str | None, host: str) -> None:
     if not label:
         return
-    imap.store(msg_id, "+X-GM-LABELS", _quote_label(label))
+    if "gmail" not in host.lower() and "google" not in host.lower():
+        log_json(
+            "debug",
+            "imap_label_skipped_non_gmail",
+            host=host,
+            label=label,
+        )
+        return
+    try:
+        imap.store(msg_id, "+X-GM-LABELS", _quote_label(label))
+    except Exception as exc:
+        log_json(
+            "warning",
+            "imap_label_failed",
+            msg_id=_decode_bytes(msg_id),
+            label=label,
+            error=str(exc),
+        )
 
 
 def _quote_label(label: str) -> str:
