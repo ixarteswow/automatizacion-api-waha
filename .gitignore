@@ -41,5 +41,7 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 scripts/
+!scripts/
+!scripts/setup_db.py
 paralel-config/
 docs/
