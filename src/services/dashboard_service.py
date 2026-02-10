@@ -47,6 +47,7 @@ def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
                 "fecha": _format_ts(row["ultimo_mensaje_ts"] or row["creado_en"]),
                 "creado": _format_ts(row["creado_en"]),
                 "ultimo_mensaje": _format_ts(row["ultimo_mensaje_ts"]),
+                "ultimo_mensaje_ts": row["ultimo_mensaje_ts"],
                 "respuestas": answers,
                 "metadata": metadata,
             }
@@ -61,6 +62,32 @@ def get_estados(db_path: str) -> list[str]:
             "ORDER BY estado_actual ASC"
         ).fetchall()
     return [str(row[0]) for row in rows]
+
+
+def get_lead_stats(db_path: str) -> dict[str, int]:
+    with db_session(db_path) as conn:
+        rows = conn.execute("SELECT scoring FROM sesiones_leads").fetchall()
+    gold = silver = red = none = 0
+    for row in rows:
+        score = row["scoring"]
+        if score is None:
+            none += 1
+            continue
+        label = _scoring_label(score)
+        if label == "GOLD":
+            gold += 1
+        elif label == "SILVER":
+            silver += 1
+        else:
+            red += 1
+    total = gold + silver + red + none
+    return {
+        "total": total,
+        "gold": gold,
+        "silver": silver,
+        "red": red,
+        "none": none,
+    }
 
 
 def _scoring_label(score: float | None) -> str | None:

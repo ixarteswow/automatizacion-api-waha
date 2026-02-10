@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from src.config import load_base_settings
 from src.services.export_csv import generate_leads_csv
 from src.services.export_service import export_table_rows, list_export_tables
-from src.services.dashboard_service import get_estados, get_leads
+from src.services.dashboard_service import get_estados, get_leads, get_lead_stats
 from src.services.lead_intake import create_lead_session
 from src.services.webhook_handler import handle_inbound_message
 
@@ -135,13 +135,17 @@ def dashboard(request: Request, estado: str | None = None):
     settings = load_base_settings()
     leads = get_leads(settings.db_path, estado)
     estados = get_estados(settings.db_path)
-    total = len(leads) if not estado else f"{len(leads)} filtrados"
+    stats = get_lead_stats(settings.db_path)
+    total_count = stats["total"]
+    filtered_count = len(leads)
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
             "leads": leads,
-            "total": total,
+            "total": total_count,
+            "filtered_count": filtered_count,
+            "stats": stats,
             "estados": estados,
             "estado_actual": estado or "",
         },
