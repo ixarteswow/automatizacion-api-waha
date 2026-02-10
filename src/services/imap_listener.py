@@ -124,7 +124,7 @@ def _process_message(imap, msg_id: bytes, settings: ImapSettings) -> bool:
         msg_id=_decode_bytes(msg_id),
         subject=subject,
     )
-    if settings.subject_keyword.lower() not in subject.lower():
+    if not subject_matches(subject, settings.subject_keyword):
         return False
 
     body_text = _extract_body_text(message)
@@ -251,6 +251,12 @@ def _decode_subject(raw: str | None) -> str:
         else:
             decoded_parts.append(part)
     return "".join(decoded_parts).strip()
+
+
+def subject_matches(subject: str, keyword: str) -> bool:
+    if not keyword:
+        return True
+    return keyword.lower() in subject.lower()
 
 
 def _escape_imap_search(value: str) -> str:
