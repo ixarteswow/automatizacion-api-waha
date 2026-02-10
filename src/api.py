@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from src.config import load_settings
+from src.config import load_base_settings
 from src.services.export_service import export_table_rows, list_export_tables
 from src.services.lead_intake import create_lead_session
 from src.services.webhook_handler import handle_inbound_message
@@ -36,7 +36,7 @@ def waha_message(payload: dict[str, Any]):
     if not message_id or not telefono:
         return {"status": "bad_request", "reason": "missing_message_id_or_telefono"}
 
-    settings = load_settings()
+    settings = load_base_settings()
     result = handle_inbound_message(
         settings.db_path,
         message_id=message_id,
@@ -50,7 +50,7 @@ def waha_message(payload: dict[str, Any]):
 
 @app.post("/leads")
 def create_lead(payload: LeadCreateRequest):
-    settings = load_settings()
+    settings = load_base_settings()
     result = create_lead_session(
         settings.db_path,
         nombre=payload.nombre,
@@ -73,7 +73,7 @@ def create_lead(payload: LeadCreateRequest):
 def _require_export_api_key(
     x_api_key: str | None = Header(default=None, alias="X-API-KEY"),
 ) -> None:
-    settings = load_settings()
+    settings = load_base_settings()
     expected = settings.export_api_key
     if not expected:
         raise HTTPException(status_code=500, detail="export_api_key_not_configured")
@@ -89,7 +89,7 @@ def export_table(
     cursor: str | None = None,
     _auth: None = Depends(_require_export_api_key),
 ):
-    settings = load_settings()
+    settings = load_base_settings()
     try:
         result = export_table_rows(
             settings.db_path,

@@ -23,11 +23,8 @@ def _require_float(key: str) -> float:
 
 
 @dataclass(frozen=True)
-class Settings:
+class BaseSettings:
     db_path: str
-    property_rent_eur: float
-    property_sqm: float
-    property_ref: str | None
     waha_base_url: str
     waha_api_key: str | None
     waha_session: str
@@ -37,11 +34,15 @@ class Settings:
     export_api_key: str | None
 
 
-def load_settings() -> Settings:
+@dataclass(frozen=True)
+class ScoringSettings:
+    property_rent_eur: float
+    property_sqm: float
+    property_ref: str | None
+
+
+def load_base_settings() -> BaseSettings:
     db_path = _get_env_str("DB_PATH", "data/app.db") or "data/app.db"
-    property_rent_eur = _require_float("PROPERTY_RENT_EUR")
-    property_sqm = _require_float("PROPERTY_SQM")
-    property_ref = _get_env_str("PROPERTY_REF")
     waha_base_url = _get_env_str("WAHA_BASE_URL", "http://waha:3000") or "http://waha:3000"
     waha_api_key = _get_env_str("WAHA_API_KEY")
     waha_session = _get_env_str("WAHA_SESSION", "default") or "default"
@@ -49,11 +50,8 @@ def load_settings() -> Settings:
     calendly_url = _get_env_str("CALENDLY_URL")
     red_info_url = _get_env_str("RED_INFO_URL")
     export_api_key = _get_env_str("EXPORT_API_KEY")
-    return Settings(
+    return BaseSettings(
         db_path=db_path,
-        property_rent_eur=property_rent_eur,
-        property_sqm=property_sqm,
-        property_ref=property_ref,
         waha_base_url=waha_base_url,
         waha_api_key=waha_api_key,
         waha_session=waha_session,
@@ -61,4 +59,15 @@ def load_settings() -> Settings:
         calendly_url=calendly_url,
         red_info_url=red_info_url,
         export_api_key=export_api_key,
+    )
+
+
+def load_scoring_settings() -> ScoringSettings:
+    property_rent_eur = _require_float("PROPERTY_RENT_EUR")
+    property_sqm = _require_float("PROPERTY_SQM")
+    property_ref = _get_env_str("PROPERTY_REF")
+    return ScoringSettings(
+        property_rent_eur=property_rent_eur,
+        property_sqm=property_sqm,
+        property_ref=property_ref,
     )

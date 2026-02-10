@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import os
 
-from src.config import load_settings
+from src.config import load_base_settings
 from src.db import db_session
 from src.domain import fsm
 from src.domain.questions import QUESTIONS_BY_ID
@@ -113,7 +113,7 @@ def _maybe_send_next_question(
         )
         return
 
-    settings = load_settings()
+    settings = load_base_settings()
     config = NotificationConfig(
         waha_base_url=settings.waha_base_url,
         waha_api_key=settings.waha_api_key,

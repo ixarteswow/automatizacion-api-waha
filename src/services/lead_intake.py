@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Iterable
 
-from src.config import load_settings
+from src.config import load_base_settings
 from src.db import db_session
 from src.domain import fsm
 from src.domain.questions import QUESTIONS_BY_ID
@@ -209,7 +209,7 @@ def _find_existing_session(conn, candidates: Iterable[str]):
 
 
 def _send_first_question(telefono: str, text: str) -> None:
-    settings = load_settings()
+    settings = load_base_settings()
     config = NotificationConfig(
         waha_base_url=settings.waha_base_url,
         waha_api_key=settings.waha_api_key,

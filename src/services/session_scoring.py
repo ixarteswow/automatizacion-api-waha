@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Mapping
 
-from src.config import load_settings
+from src.config import load_base_settings, load_scoring_settings
 from src.db import db_session
 from src.domain.lead_profile_builder import build_lead_profile
 from src.domain.scoring import ScoreResult, compute_score
@@ -23,7 +23,7 @@ def score_session(
     finalize: bool = False,
     correlation_id: str | None = None,
 ) -> ScoreResult:
-    settings = load_settings()
+    scoring_settings = load_scoring_settings()
     with db_session(db_path) as conn:
         row = conn.execute(
             """
@@ -45,8 +45,8 @@ def score_session(
         respuestas_payload = _load_json(respuestas_clean)
         metadata = _load_json(row["metadata"])
 
-        alquiler_mensual = row["alquiler_mensual"] or settings.property_rent_eur
-        metros_cuadrados = row["metros_cuadrados"] or settings.property_sqm
+        alquiler_mensual = row["alquiler_mensual"] or scoring_settings.property_rent_eur
+        metros_cuadrados = row["metros_cuadrados"] or scoring_settings.property_sqm
 
         profile = build_lead_profile(
             respuestas_clean,
@@ -113,7 +113,7 @@ def _maybe_send_notification(
     *,
     correlation_id: str | None = None,
 ) -> None:
-    settings = load_settings()
+    settings = load_base_settings()
     config = NotificationConfig(
         waha_base_url=settings.waha_base_url,
         waha_api_key=settings.waha_api_key,
