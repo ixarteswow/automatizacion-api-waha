@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environments
+.venv/
+venv/
+ENV/
+.env
+.env.*
+!.env.example
+
+# Test/coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Project local data
+notas/
+.notas/
+data/
+db/
+
+# Docs (only README.md allowed)
+*.md
+!README.md
+
+# Non-repo assets
+Dockerfile
+docker-compose.yml
+.dockerignore
+scripts/
+paralel-config/
+docs/
