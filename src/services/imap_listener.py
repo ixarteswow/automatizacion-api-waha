@@ -75,9 +75,13 @@ def run_once(settings: ImapSettings) -> int:
             return processed
 
         msg_ids = data[0].split() if data and data[0] else []
+        log_json("info", "imap_poll_started", unseen=len(msg_ids))
         for msg_id in msg_ids:
             if _process_message(imap, msg_id, settings):
                 processed += 1
+
+        skipped = max(0, len(msg_ids) - processed)
+        log_json("info", "imap_poll_complete", processed=processed, skipped=skipped)
 
     return processed
 
@@ -97,8 +101,7 @@ def _search_unseen(imap, subject_keyword: str) -> tuple[str, list[Any]]:
 
 def run_forever(settings: ImapSettings) -> None:
     while True:
-        count = run_once(settings)
-        log_json("info", "imap_poll_complete", processed=count)
+        run_once(settings)
         time.sleep(settings.poll_seconds)
 
 
@@ -115,6 +118,12 @@ def _process_message(imap, msg_id: bytes, settings: ImapSettings) -> bool:
 
     message = email.message_from_bytes(raw_bytes)
     subject = _decode_subject(message.get("Subject"))
+    log_json(
+        "info",
+        "imap_processing_email",
+        msg_id=_decode_bytes(msg_id),
+        subject=subject,
+    )
     if settings.subject_keyword.lower() not in subject.lower():
         return False
 
