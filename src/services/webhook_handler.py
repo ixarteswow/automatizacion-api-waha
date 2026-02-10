@@ -35,7 +35,9 @@ def handle_inbound_message(
         timestamp = int(normalize_ts(received_ts))
     else:
         timestamp = int(time.time())
-    telefono = to_chat_id(telefono) or telefono
+    telefono_raw = telefono
+    telefono_normalized = to_chat_id(telefono) or telefono
+    telefono = telefono_normalized
 
     with db_session(db_path) as conn:
         try:
@@ -52,14 +54,12 @@ def handle_inbound_message(
                 return WebhookResult(status="duplicate")
             raise
 
-        session = conn.execute(
-            "SELECT estado_actual FROM sesiones_leads WHERE telefono = ?",
-            (telefono,),
-        ).fetchone()
+        session = _find_session(conn, telefono_normalized, telefono_raw)
 
         if session is None:
             return WebhookResult(status="unknown")
 
+        telefono = session["telefono"]
         estado_actual = int(session["estado_actual"])
 
     if fsm.is_terminal_state(estado_actual):
@@ -159,3 +159,17 @@ def _log_event(
             payload=payload,
             correlation_id=correlation_id,
         )
+
+
+def _find_session(conn, *candidates: str) -> Any:
+    values = [value for value in candidates if value]
+    if not values:
+        return None
+    placeholders = ",".join("?" for _ in values)
+    query = f"""
+        SELECT telefono, estado_actual
+        FROM sesiones_leads
+        WHERE telefono IN ({placeholders})
+        LIMIT 1
+    """
+    return conn.execute(query, tuple(values)).fetchone()
