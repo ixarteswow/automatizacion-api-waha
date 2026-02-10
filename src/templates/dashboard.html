@@ -33,24 +33,26 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Telefono</th>
                         <th>Nombre</th>
+                        <th>Telefono</th>
                         <th>Estado</th>
                         <th>Scoring</th>
                         <th>Categoria</th>
-                        <th>Fecha</th>
+                        <th>Ultimo mensaje</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for lead in leads %}
-                    <tr class="row-{{ lead.label|lower|default('none') }}">
+                    <tr class="row-{{ lead.label|lower|default('none') }}" data-lead='{{ lead | tojson }}'>
                         <td>{{ lead.lead_id }}</td>
-                        <td>{{ lead.telefono }}</td>
                         <td>{{ lead.nombre }}</td>
+                        <td>
+                            <button type="button" class="phone-link js-open">{{ lead.telefono }}</button>
+                        </td>
                         <td>{{ lead.estado }}</td>
                         <td>{{ lead.scoring if lead.scoring is not none else '-' }}</td>
                         <td>{{ lead.label|default('-') }}</td>
-                        <td>{{ lead.fecha }}</td>
+                        <td>{{ lead.ultimo_mensaje }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -60,5 +62,129 @@
         <p class="vacio">No hay leads registrados{{ ' con estado "' + estado_actual + '"' if estado_actual else '' }}.</p>
         {% endif %}
     </div>
+
+    <div class="modal" data-modal>
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-card" role="dialog" aria-modal="true">
+            <button type="button" class="modal-close" data-close>×</button>
+            <div class="modal-header">
+                <div>
+                    <h2 id="modal-name">-</h2>
+                    <p class="modal-sub" id="modal-phone">-</p>
+                </div>
+                <div class="modal-chips" id="modal-chips"></div>
+            </div>
+            <div class="modal-body">
+                <section class="modal-section">
+                    <h3>Resumen</h3>
+                    <div class="summary-grid" id="modal-summary"></div>
+                </section>
+                <section class="modal-section">
+                    <h3>Respuestas</h3>
+                    <div class="answer-grid" id="modal-answers"></div>
+                </section>
+                <section class="modal-section">
+                    <h3>Metadata</h3>
+                    <pre class="meta" id="modal-meta"></pre>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.querySelector('[data-modal]');
+        const modalName = document.getElementById('modal-name');
+        const modalPhone = document.getElementById('modal-phone');
+        const modalChips = document.getElementById('modal-chips');
+        const modalSummary = document.getElementById('modal-summary');
+        const modalAnswers = document.getElementById('modal-answers');
+        const modalMeta = document.getElementById('modal-meta');
+
+        const escapeHtml = (value) => {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
+        const renderChips = (lead) => {
+            const chips = [];
+            if (lead.label) {
+                chips.push(`<span class="chip chip-${lead.label.toLowerCase()}">${escapeHtml(lead.label)}</span>`);
+            }
+            chips.push(`<span class="chip">Estado ${escapeHtml(lead.estado)}</span>`);
+            if (lead.origen) {
+                chips.push(`<span class="chip chip-muted">${escapeHtml(lead.origen)}</span>`);
+            }
+            modalChips.innerHTML = chips.join('');
+        };
+
+        const renderSummary = (lead) => {
+            const items = [
+                { label: 'Creado', value: lead.creado || '-' },
+                { label: 'Ultimo mensaje', value: lead.ultimo_mensaje || '-' },
+                { label: 'Scoring', value: lead.scoring ?? '-' },
+                { label: 'Telefono', value: lead.telefono || '-' },
+            ];
+            modalSummary.innerHTML = items.map(item => (
+                `<div class="summary-item"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>`
+            )).join('');
+        };
+
+        const renderAnswers = (answers) => {
+            if (!answers || !answers.length) {
+                modalAnswers.innerHTML = '<div class="answer-empty">Sin respuestas registradas.</div>';
+                return;
+            }
+            modalAnswers.innerHTML = answers.map(answer => (
+                `<div class="answer-item"><span>${escapeHtml(answer.label)}</span><p>${escapeHtml(answer.value)}</p></div>`
+            )).join('');
+        };
+
+        const renderMeta = (metadata) => {
+            if (!metadata || Object.keys(metadata).length === 0) {
+                modalMeta.textContent = '-';
+                return;
+            }
+            modalMeta.textContent = JSON.stringify(metadata, null, 2);
+        };
+
+        const openModal = (lead) => {
+            modalName.textContent = lead.nombre || '-';
+            modalPhone.textContent = lead.telefono || '-';
+            renderChips(lead);
+            renderSummary(lead);
+            renderAnswers(lead.respuestas || []);
+            renderMeta(lead.metadata);
+            modal.classList.add('is-open');
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('is-open');
+        };
+
+        document.querySelectorAll('.js-open').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                const row = event.target.closest('tr');
+                if (!row || !row.dataset.lead) {
+                    return;
+                }
+                const lead = JSON.parse(row.dataset.lead);
+                openModal(lead);
+            });
+        });
+
+        document.querySelectorAll('[data-close]').forEach((button) => {
+            button.addEventListener('click', closeModal);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>

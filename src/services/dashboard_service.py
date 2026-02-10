@@ -1,13 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import json
+from typing import Any, Mapping
 
 from src.db import db_session
+from src.domain.lead_profile_builder import ANSWER_KEY_ALIASES
+from src.domain.questions import QUESTIONS
+
+_QUESTION_LABELS = {q.key: q.text for q in QUESTIONS}
+_CANONICAL_ORDER = [q.key for q in QUESTIONS]
 
 
 def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
     query = (
-        "SELECT id, telefono, nombre, estado_actual, scoring, creado_en "
+        "SELECT id, telefono, nombre, origen, estado_actual, scoring, creado_en, "
+        "ultimo_mensaje_ts, respuestas_clean, metadata "
         "FROM sesiones_leads"
     )
     params: list[object] = []
@@ -25,15 +33,22 @@ def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
 
     leads: list[dict] = []
     for row in rows:
+        answers = _build_answer_list(row["respuestas_clean"])
+        metadata = _load_json(row["metadata"])
         leads.append(
             {
                 "lead_id": row["id"],
                 "telefono": row["telefono"],
                 "nombre": row["nombre"],
+                "origen": row["origen"],
                 "estado": row["estado_actual"],
                 "scoring": row["scoring"],
                 "label": _scoring_label(row["scoring"]),
-                "fecha": _format_ts(row["creado_en"]),
+                "fecha": _format_ts(row["ultimo_mensaje_ts"] or row["creado_en"]),
+                "creado": _format_ts(row["creado_en"]),
+                "ultimo_mensaje": _format_ts(row["ultimo_mensaje_ts"]),
+                "respuestas": answers,
+                "metadata": metadata,
             }
         )
     return leads
@@ -64,3 +79,62 @@ def _format_ts(ts) -> str:
     if isinstance(ts, (int, float)):
         return datetime.fromtimestamp(float(ts), tz=timezone.utc).strftime("%Y-%m-%d %H:%M")
     return str(ts)
+
+
+def _load_json(raw: Any) -> dict[str, Any]:
+    if not raw:
+        return {}
+    if isinstance(raw, Mapping):
+        return dict(raw)
+    if isinstance(raw, str):
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+        if isinstance(parsed, Mapping):
+            return dict(parsed)
+    return {}
+
+
+def _build_answer_list(raw: Any) -> list[dict[str, str]]:
+    data = _load_json(raw)
+    if not data:
+        return []
+    answers: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for canonical in _CANONICAL_ORDER:
+        aliases = ANSWER_KEY_ALIASES.get(canonical, (canonical,))
+        value = _first_present(data, aliases)
+        if value is None:
+            continue
+        answers.append(
+            {
+                "label": _QUESTION_LABELS.get(canonical, canonical),
+                "value": _stringify(value),
+            }
+        )
+        seen.update(aliases)
+
+    for key, value in data.items():
+        if key in seen:
+            continue
+        label = _QUESTION_LABELS.get(key, key)
+        answers.append({"label": label, "value": _stringify(value)})
+
+    return answers
+
+
+def _first_present(data: Mapping[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        if key in data:
+            return data[key]
+    return None
+
+
+def _stringify(value: Any) -> str:
+    if value is None:
+        return "-"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True)
+    return str(value)
