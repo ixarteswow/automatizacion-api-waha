@@ -7,362 +7,228 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="page">
-        <header class="hero">
-            <div>
-                <h1>Panel de Leads</h1>
-                <p>{{ total }} leads registrados</p>
-            </div>
-            <a href="/export/leads.csv" class="btn-export">Descargar CSV</a>
-        </header>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>Panel de Leads</h1>
+        <p>{{ total }} leads registrados</p>
+      </div>
+      <a href="/export/leads.csv" class="btn-export">Descargar CSV</a>
+    </header>
 
-        <section class="cards">
-            <div class="card">
-                <span>Total</span>
-                <strong>{{ stats.total }}</strong>
-            </div>
-            <div class="card card-gold">
-                <span>GOLD</span>
-                <strong>{{ stats.gold }}</strong>
-            </div>
-            <div class="card card-silver">
-                <span>SILVER</span>
-                <strong>{{ stats.silver }}</strong>
-            </div>
-            <div class="card card-red">
-                <span>RED</span>
-                <strong>{{ stats.red }}</strong>
-            </div>
-            <div class="card card-none">
-                <span>Sin categoria</span>
-                <strong>{{ stats.none }}</strong>
-            </div>
-        </section>
+    <section class="kpis">
+      <div class="kpi-card kpi-total">
+        <span class="kpi-number">{{ stats.total }}</span>
+        <span class="kpi-label">Total</span>
+      </div>
+      <div class="kpi-card kpi-gold">
+        <span class="kpi-number">{{ stats.gold }}</span>
+        <span class="kpi-label">Gold</span>
+      </div>
+      <div class="kpi-card kpi-silver">
+        <span class="kpi-number">{{ stats.silver }}</span>
+        <span class="kpi-label">Silver</span>
+      </div>
+      <div class="kpi-card kpi-red">
+        <span class="kpi-number">{{ stats.red }}</span>
+        <span class="kpi-label">Red</span>
+      </div>
+    </section>
 
-        <form method="get" action="/" class="toolbar" data-toolbar>
-            <div class="toolbar-group">
-                <label for="estado">Estado</label>
-                <select name="estado" id="estado">
-                    <option value="">Todos</option>
-                    {% for e in estados %}
-                    <option value="{{ e }}" {% if e == estado_actual %}selected{% endif %}>{{ e }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit">Filtrar</button>
-            </div>
-            <div class="toolbar-group">
-                <label for="search">Buscar</label>
-                <input type="search" id="search" placeholder="Nombre o telefono" autocomplete="off">
-            </div>
-            <div class="toolbar-count" id="count-label">Mostrando {{ filtered_count }} de {{ total }} leads</div>
-        </form>
+    <section class="toolbar">
+      <select name="estado" id="estado">
+        <option value="">Todos</option>
+        {% for e in estados %}
+        <option value="{{ e }}" {% if e == estado_actual %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" id="search" placeholder="Buscar por nombre o teléfono..." autocomplete="off">
+      <span class="toolbar-count" id="count-label">Mostrando {{ filtered_count }} de {{ total }}</span>
+    </section>
 
-        {% if leads %}
-        <div class="table-wrap">
-            <table id="leads-table" data-total="{{ total }}">
-                <thead>
-                    <tr>
-                        <th data-sort="id">ID <span class="sort-indicator"></span></th>
-                        <th data-sort="nombre">Nombre <span class="sort-indicator"></span></th>
-                        <th data-sort="telefono">Telefono <span class="sort-indicator"></span></th>
-                        <th data-sort="estado">Estado <span class="sort-indicator"></span></th>
-                        <th data-sort="scoring">Scoring <span class="sort-indicator"></span></th>
-                        <th data-sort="categoria">Categoria <span class="sort-indicator"></span></th>
-                        <th data-sort="ultimo">Ultimo mensaje <span class="sort-indicator"></span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                    <tr class="row-{{ lead.label|lower|default('none') }}" data-lead='{{ lead | tojson }}'
-                        data-id="{{ lead.lead_id }}"
-                        data-nombre="{{ lead.nombre|default('')|e }}"
-                        data-telefono="{{ lead.telefono|default('')|e }}"
-                        data-estado="{{ lead.estado }}"
-                        data-scoring="{{ lead.scoring if lead.scoring is not none else '' }}"
-                        data-categoria="{{ lead.label|default('') }}"
-                        data-ultimo="{{ lead.ultimo_mensaje_ts or 0 }}">
-                        <td class="num">{{ lead.lead_id }}</td>
-                        <td>{{ lead.nombre }}</td>
-                        <td>
-                            <button type="button" class="phone-link js-open">{{ lead.telefono }}</button>
-                        </td>
-                        <td class="num">{{ lead.estado }}</td>
-                        <td>
-                            {% if lead.scoring is not none %}
-                            <div class="score">
-                                <span>{{ lead.scoring }}</span>
-                                <div class="score-bar"><div style="width: {{ lead.scoring }}%"></div></div>
-                            </div>
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if lead.label %}
-                                <span class="badge badge-{{ lead.label|lower }}">{{ lead.label }}</span>
-                            {% else %}
-                                <span class="badge badge-none">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="relative-time" data-ts="{{ lead.ultimo_mensaje_ts or 0 }}" title="{{ lead.ultimo_mensaje }}">
-                                {{ lead.ultimo_mensaje }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="vacio">No hay leads registrados{{ ' con estado "' + estado_actual + '"' if estado_actual else '' }}.</p>
-        {% endif %}
-    </div>
-
-    <div class="modal" data-modal>
-        <div class="modal-backdrop" data-close></div>
-        <div class="modal-card" role="dialog" aria-modal="true">
-            <button type="button" class="modal-close" data-close>×</button>
-            <div class="modal-header">
-                <div>
-                    <h2 id="modal-name">-</h2>
-                    <p class="modal-sub" id="modal-phone">-</p>
+    {% if leads %}
+    <section class="table-wrap">
+      <table id="leads-table" data-total="{{ total }}">
+        <thead>
+          <tr>
+            <th class="num" data-sort="id">ID <span class="sort-indicator"></span></th>
+            <th data-sort="nombre">Nombre <span class="sort-indicator"></span></th>
+            <th data-sort="telefono">Telefono <span class="sort-indicator"></span></th>
+            <th data-sort="estado">Estado <span class="sort-indicator"></span></th>
+            <th class="num" data-sort="scoring">Scoring <span class="sort-indicator"></span></th>
+            <th data-sort="categoria">Categoria <span class="sort-indicator"></span></th>
+            <th data-sort="ultimo">Ultimo mensaje <span class="sort-indicator"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr
+            data-id="{{ lead.lead_id }}"
+            data-nombre="{{ lead.nombre|default('')|e }}"
+            data-telefono="{{ lead.telefono|default('')|e }}"
+            data-estado="{{ lead.estado }}"
+            data-scoring="{{ lead.scoring if lead.scoring is not none else '' }}"
+            data-categoria="{{ lead.label|default('') }}"
+            data-ultimo="{{ lead.ultimo_mensaje_ts or 0 }}">
+            <td class="num">{{ lead.lead_id }}</td>
+            <td>{{ lead.nombre }}</td>
+            <td>{{ lead.telefono }}</td>
+            <td>{{ lead.estado }}</td>
+            <td class="num">
+              {% if lead.scoring is not none %}
+              <div class="score-bar-wrap">
+                <div class="score-bar-track">
+                  <div class="score-bar" style="width: {{ lead.scoring }}%"></div>
                 </div>
-                <div class="modal-chips" id="modal-chips"></div>
-            </div>
-            <div class="modal-body">
-                <section class="modal-section">
-                    <h3>Resumen</h3>
-                    <div class="summary-grid" id="modal-summary"></div>
-                </section>
-                <section class="modal-section">
-                    <h3>Respuestas</h3>
-                    <div class="answer-grid" id="modal-answers"></div>
-                </section>
-                <section class="modal-section">
-                    <h3>Metadata</h3>
-                    <pre class="meta" id="modal-meta"></pre>
-                </section>
-            </div>
-        </div>
-    </div>
+                <span class="score-value">{{ lead.scoring }}</span>
+              </div>
+              {% else %}
+              -
+              {% endif %}
+            </td>
+            <td>
+              {% if lead.label %}
+                <span class="badge badge-{{ lead.label|lower }}">{{ lead.label }}</span>
+              {% else %}
+                <span class="badge badge-none">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="relative-time" data-ts="{{ lead.ultimo_mensaje_ts or 0 }}" title="{{ lead.ultimo_mensaje }}">
+                {{ lead.ultimo_mensaje }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% else %}
+    <p class="vacio">No hay leads registrados{{ ' con estado "' + estado_actual + '"' if estado_actual else '' }}.</p>
+    {% endif %}
+  </div>
 
-    <script>
-        const modal = document.querySelector('[data-modal]');
-        const modalName = document.getElementById('modal-name');
-        const modalPhone = document.getElementById('modal-phone');
-        const modalChips = document.getElementById('modal-chips');
-        const modalSummary = document.getElementById('modal-summary');
-        const modalAnswers = document.getElementById('modal-answers');
-        const modalMeta = document.getElementById('modal-meta');
-        const toolbar = document.querySelector('[data-toolbar]');
-        const searchInput = document.getElementById('search');
-        const estadoSelect = document.getElementById('estado');
-        const countLabel = document.getElementById('count-label');
-        const tableBody = document.querySelector('#leads-table tbody');
-        const table = document.getElementById('leads-table');
+  <script>
+    const searchInput = document.getElementById('search');
+    const estadoSelect = document.getElementById('estado');
+    const countLabel = document.getElementById('count-label');
+    const table = document.getElementById('leads-table');
+    const tableBody = table ? table.querySelector('tbody') : null;
 
-        const escapeHtml = (value) => {
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        };
+    const formatRelative = (ts) => {
+      if (!ts) return '-';
+      const now = Date.now() / 1000;
+      const diff = Math.max(0, Math.floor(now - ts));
+      if (diff < 60) return `hace ${diff}s`;
+      const minutes = Math.floor(diff / 60);
+      if (minutes < 60) return `hace ${minutes} min`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `hace ${hours} h`;
+      const days = Math.floor(hours / 24);
+      if (days < 30) return `hace ${days} dias`;
+      const months = Math.floor(days / 30);
+      if (months < 12) return `hace ${months} meses`;
+      const years = Math.floor(months / 12);
+      return `hace ${years} anos`;
+    };
 
-        const renderChips = (lead) => {
-            const chips = [];
-            if (lead.label) {
-                chips.push(`<span class="chip chip-${lead.label.toLowerCase()}">${escapeHtml(lead.label)}</span>`);
-            }
-            chips.push(`<span class="chip">Estado ${escapeHtml(lead.estado)}</span>`);
-            if (lead.origen) {
-                chips.push(`<span class="chip chip-muted">${escapeHtml(lead.origen)}</span>`);
-            }
-            modalChips.innerHTML = chips.join('');
-        };
+    const updateRelativeTimes = () => {
+      if (!tableBody) return;
+      document.querySelectorAll('.relative-time').forEach((el) => {
+        const ts = Number(el.dataset.ts || 0);
+        if (!ts) return;
+        el.textContent = formatRelative(ts);
+      });
+    };
 
-        const renderSummary = (lead) => {
-            const items = [
-                { label: 'Creado', value: lead.creado || '-' },
-                { label: 'Ultimo mensaje', value: lead.ultimo_mensaje || '-' },
-                { label: 'Scoring', value: lead.scoring ?? '-' },
-                { label: 'Telefono', value: lead.telefono || '-' },
-            ];
-            modalSummary.innerHTML = items.map(item => (
-                `<div class="summary-item"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>`
-            )).join('');
-        };
+    const updateCount = () => {
+      if (!tableBody) return;
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      const visible = rows.filter(row => !row.classList.contains('is-hidden')).length;
+      const total = Number(table.dataset.total || rows.length);
+      countLabel.textContent = `Mostrando ${visible} de ${total}`;
+    };
 
-        const renderAnswers = (answers) => {
-            if (!answers || !answers.length) {
-                modalAnswers.innerHTML = '<div class="answer-empty">Sin respuestas registradas.</div>';
-                return;
-            }
-            modalAnswers.innerHTML = answers.map(answer => (
-                `<div class="answer-item"><span>${escapeHtml(answer.label)}</span><p>${escapeHtml(answer.value)}</p></div>`
-            )).join('');
-        };
+    const applyFilters = () => {
+      const query = (searchInput.value || '').toLowerCase().trim();
+      const estado = estadoSelect.value;
+      if (!tableBody) return;
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
 
-        const renderMeta = (metadata) => {
-            if (!metadata || Object.keys(metadata).length === 0) {
-                modalMeta.textContent = '-';
-                return;
-            }
-            modalMeta.textContent = JSON.stringify(metadata, null, 2);
-        };
+      rows.forEach((row) => {
+        const name = (row.dataset.nombre || '').toLowerCase();
+        const phone = (row.dataset.telefono || '').toLowerCase();
+        const state = row.dataset.estado || '';
+        const matchQuery = !query || name.includes(query) || phone.includes(query);
+        const matchEstado = !estado || state === estado;
+        row.classList.toggle('is-hidden', !(matchQuery && matchEstado));
+      });
+      updateCount();
+    };
 
-        const openModal = (lead) => {
-            modalName.textContent = lead.nombre || '-';
-            modalPhone.textContent = lead.telefono || '-';
-            renderChips(lead);
-            renderSummary(lead);
-            renderAnswers(lead.respuestas || []);
-            renderMeta(lead.metadata);
-            modal.classList.add('is-open');
-        };
+    const sortState = { key: null, dir: 'asc' };
 
-        const closeModal = () => {
-            modal.classList.remove('is-open');
-        };
+    const getSortValue = (row, key) => {
+      const value = row.dataset[key] || '';
+      if (['id', 'estado'].includes(key)) {
+        return Number(value) || 0;
+      }
+      if (key === 'scoring') {
+        return Number(value) || -1;
+      }
+      if (key === 'ultimo') {
+        return Number(value) || 0;
+      }
+      return value.toString().toLowerCase();
+    };
 
-        document.querySelectorAll('.js-open').forEach((button) => {
-            button.addEventListener('click', (event) => {
-                const row = event.target.closest('tr');
-                if (!row || !row.dataset.lead) {
-                    return;
-                }
-                const lead = JSON.parse(row.dataset.lead);
-                openModal(lead);
-            });
-        });
-
-        document.querySelectorAll('[data-close]').forEach((button) => {
-            button.addEventListener('click', closeModal);
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        const formatRelative = (ts) => {
-            if (!ts) return '-';
-            const now = Date.now() / 1000;
-            const diff = Math.max(0, Math.floor(now - ts));
-            if (diff < 60) return `hace ${diff}s`;
-            const minutes = Math.floor(diff / 60);
-            if (minutes < 60) return `hace ${minutes} min`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `hace ${hours} h`;
-            const days = Math.floor(hours / 24);
-            if (days < 30) return `hace ${days} dias`;
-            const months = Math.floor(days / 30);
-            if (months < 12) return `hace ${months} meses`;
-            const years = Math.floor(months / 12);
-            return `hace ${years} anos`;
-        };
-
-        const updateRelativeTimes = () => {
-            document.querySelectorAll('.relative-time').forEach((el) => {
-                const ts = Number(el.dataset.ts || 0);
-                if (!ts) return;
-                el.textContent = formatRelative(ts);
-            });
-        };
-
-        const updateCount = () => {
-            const rows = Array.from(tableBody.querySelectorAll('tr'));
-            const visible = rows.filter(row => !row.classList.contains('is-hidden')).length;
-            const total = Number(table.dataset.total || rows.length);
-            countLabel.textContent = `Mostrando ${visible} de ${total} leads`;
-        };
-
-        const applyFilters = () => {
-            const query = (searchInput.value || '').toLowerCase().trim();
-            const estado = estadoSelect.value;
-            const rows = Array.from(tableBody.querySelectorAll('tr'));
-
-            rows.forEach((row) => {
-                const name = (row.dataset.nombre || '').toLowerCase();
-                const phone = (row.dataset.telefono || '').toLowerCase();
-                const state = row.dataset.estado || '';
-                const matchQuery = !query || name.includes(query) || phone.includes(query);
-                const matchEstado = !estado || state === estado;
-                row.classList.toggle('is-hidden', !(matchQuery && matchEstado));
-            });
-            updateCount();
-        };
-
-        const sortState = { key: null, dir: 'asc' };
-
-        const getSortValue = (row, key) => {
-            const value = row.dataset[key] || '';
-            if (['id', 'estado'].includes(key)) {
-                return Number(value) || 0;
-            }
-            if (key === 'scoring') {
-                return Number(value) || -1;
-            }
-            if (key === 'ultimo') {
-                return Number(value) || 0;
-            }
-            return value.toString().toLowerCase();
-        };
-
-        const updateSortIndicators = () => {
-            document.querySelectorAll('th[data-sort]').forEach((th) => {
-                const indicator = th.querySelector('.sort-indicator');
-                if (!indicator) return;
-                if (th.dataset.sort === sortState.key) {
-                    indicator.textContent = sortState.dir === 'asc' ? '↑' : '↓';
-                } else {
-                    indicator.textContent = '';
-                }
-            });
-        };
-
-        const sortTable = (key) => {
-            const rows = Array.from(tableBody.querySelectorAll('tr'));
-            const dir = sortState.key === key && sortState.dir === 'asc' ? 'desc' : 'asc';
-            sortState.key = key;
-            sortState.dir = dir;
-
-            rows.sort((a, b) => {
-                const aVal = getSortValue(a, key);
-                const bVal = getSortValue(b, key);
-                if (aVal < bVal) return dir === 'asc' ? -1 : 1;
-                if (aVal > bVal) return dir === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            rows.forEach(row => tableBody.appendChild(row));
-            updateSortIndicators();
-        };
-
-        document.querySelectorAll('th[data-sort]').forEach((th) => {
-            th.addEventListener('click', () => sortTable(th.dataset.sort));
-        });
-
-        if (toolbar) {
-            toolbar.addEventListener('submit', (event) => {
-                event.preventDefault();
-                applyFilters();
-            });
+    const updateSortIndicators = () => {
+      document.querySelectorAll('th[data-sort]').forEach((th) => {
+        const indicator = th.querySelector('.sort-indicator');
+        if (!indicator) return;
+        if (th.dataset.sort === sortState.key) {
+          indicator.textContent = '▲▼';
+        } else {
+          indicator.textContent = '';
         }
+      });
+    };
 
-        if (searchInput) {
-            searchInput.addEventListener('input', applyFilters);
-        }
+    const sortTable = (key) => {
+      if (!tableBody) return;
+      const rows = Array.from(tableBody.querySelectorAll('tr'));
+      const dir = sortState.key === key && sortState.dir === 'asc' ? 'desc' : 'asc';
+      sortState.key = key;
+      sortState.dir = dir;
 
-        if (estadoSelect) {
-            estadoSelect.addEventListener('change', applyFilters);
-        }
+      rows.sort((a, b) => {
+        const aVal = getSortValue(a, key);
+        const bVal = getSortValue(b, key);
+        if (aVal < bVal) return dir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
 
-        updateRelativeTimes();
-        applyFilters();
-    </script>
+      rows.forEach(row => tableBody.appendChild(row));
+      updateSortIndicators();
+    };
+
+    if (table) {
+      document.querySelectorAll('th[data-sort]').forEach((th) => {
+        th.addEventListener('click', () => sortTable(th.dataset.sort));
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+
+    if (estadoSelect) {
+      estadoSelect.addEventListener('change', applyFilters);
+    }
+
+    updateRelativeTimes();
+    applyFilters();
+  </script>
 </body>
 </html>
