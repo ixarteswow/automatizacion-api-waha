@@ -4,7 +4,7 @@ import json
 import os
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -13,12 +13,12 @@ from pydantic import BaseModel, Field
 from src.config import load_base_settings
 from src.services.export_csv import generate_leads_csv
 from src.services.export_service import export_table_rows, list_export_tables
+from src.services.dashboard_service import get_estados, get_leads
 from src.services.lead_intake import create_lead_session
 from src.services.webhook_handler import handle_inbound_message
 
 app = FastAPI()
 templates = Jinja2Templates(directory="src/templates")
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 
 class LeadCreateRequest(BaseModel):
@@ -128,6 +128,27 @@ def export_table(
         "has_more": result.next_cursor is not None,
         "available_tables": list_export_tables(),
     }
+
+
+@app.get("/")
+def dashboard(request: Request, estado: str | None = None):
+    settings = load_base_settings()
+    leads = get_leads(settings.db_path, estado)
+    estados = get_estados(settings.db_path)
+    total = len(leads) if not estado else f"{len(leads)} filtrados"
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "leads": leads,
+            "total": total,
+            "estados": estados,
+            "estado_actual": estado or "",
+        },
+    )
+
+
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 
 def _extract_message(

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Leads</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div>
+                <h1>Panel de Leads</h1>
+                <p>{{ total }} leads registrados</p>
+            </div>
+            <a href="/export/leads.csv" class="btn-export">Descargar CSV</a>
+        </header>
+
+        <form method="get" action="/" class="filtro">
+            <label for="estado">Filtrar por estado</label>
+            <select name="estado" id="estado">
+                <option value="">Todos</option>
+                {% for e in estados %}
+                <option value="{{ e }}" {% if e == estado_actual %}selected{% endif %}>{{ e }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Filtrar</button>
+        </form>
+
+        {% if leads %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Telefono</th>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Scoring</th>
+                        <th>Categoria</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr class="row-{{ lead.label|lower|default('none') }}">
+                        <td>{{ lead.lead_id }}</td>
+                        <td>{{ lead.telefono }}</td>
+                        <td>{{ lead.nombre }}</td>
+                        <td>{{ lead.estado }}</td>
+                        <td>{{ lead.scoring if lead.scoring is not none else '-' }}</td>
+                        <td>{{ lead.label|default('-') }}</td>
+                        <td>{{ lead.fecha }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="vacio">No hay leads registrados{{ ' con estado "' + estado_actual + '"' if estado_actual else '' }}.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
