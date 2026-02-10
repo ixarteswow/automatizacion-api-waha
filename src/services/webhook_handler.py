@@ -40,6 +40,12 @@ def handle_inbound_message(
     telefono = telefono_normalized
 
     with db_session(db_path) as conn:
+        session = _find_session(conn, telefono_normalized, telefono_raw)
+
+        if session is None:
+            return WebhookResult(status="unknown")
+
+        telefono = session["telefono"]
         try:
             conn.execute(
                 "INSERT INTO mensajes_procesados (waha_message_id, telefono) VALUES (?, ?)",
@@ -54,12 +60,6 @@ def handle_inbound_message(
                 return WebhookResult(status="duplicate")
             raise
 
-        session = _find_session(conn, telefono_normalized, telefono_raw)
-
-        if session is None:
-            return WebhookResult(status="unknown")
-
-        telefono = session["telefono"]
         estado_actual = int(session["estado_actual"])
 
     if fsm.is_terminal_state(estado_actual):
