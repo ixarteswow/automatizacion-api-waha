@@ -5,6 +5,8 @@ import os
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from src.config import load_base_settings
@@ -13,6 +15,8 @@ from src.services.lead_intake import create_lead_session
 from src.services.webhook_handler import handle_inbound_message
 
 app = FastAPI()
+templates = Jinja2Templates(directory="src/templates")
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
 
 
 class LeadCreateRequest(BaseModel):
