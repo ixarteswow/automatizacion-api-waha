@@ -5,11 +5,13 @@ import os
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from src.config import load_base_settings
+from src.services.export_csv import generate_leads_csv
 from src.services.export_service import export_table_rows, list_export_tables
 from src.services.lead_intake import create_lead_session
 from src.services.webhook_handler import handle_inbound_message
@@ -83,6 +85,17 @@ def _require_export_api_key(
         raise HTTPException(status_code=500, detail="export_api_key_not_configured")
     if x_api_key != expected:
         raise HTTPException(status_code=401, detail="invalid_api_key")
+
+
+@app.get("/export/leads.csv")
+def export_leads_csv() -> Response:
+    settings = load_base_settings()
+    csv_content = generate_leads_csv(settings.db_path)
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="leads.csv"'},
+    )
 
 
 @app.get("/export/{table}")
