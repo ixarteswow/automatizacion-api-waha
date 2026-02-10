@@ -13,6 +13,7 @@ from src.logging_utils import log_evento
 from src.services.notifications import NotificationConfig, send_whatsapp_text
 from src.services.session_flow import advance_on_valid_answer
 from src.utils.phone import to_chat_id
+from src.utils.time import normalize_ts
 
 
 @dataclass(frozen=True)
@@ -30,7 +31,10 @@ def handle_inbound_message(
     text: str,
     received_ts: int | None = None,
 ) -> WebhookResult:
-    timestamp = received_ts or int(time.time())
+    if received_ts:
+        timestamp = int(normalize_ts(received_ts))
+    else:
+        timestamp = int(time.time())
     telefono = to_chat_id(telefono) or telefono
 
     with db_session(db_path) as conn:
