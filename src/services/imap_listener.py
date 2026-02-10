@@ -238,6 +238,11 @@ def _iter_text_parts(message: email.message.Message) -> Iterable[str]:
 
 
 def _strip_html(value: str) -> str:
+    if not value:
+        return ""
+    value = re.sub(r"(?i)<br\\s*/?>", "\n", value)
+    value = re.sub(r"(?i)</p>", "\n", value)
+    value = re.sub(r"(?i)</div>", "\n", value)
     return _HTML_TAG_RE.sub(" ", value)
 
 
