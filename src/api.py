@@ -148,6 +148,7 @@ def dashboard(request: Request, estado: str | None = None):
             "stats": stats,
             "estados": estados,
             "estado_actual": estado or "",
+            "agent_name": settings.agent_name or "Agente no definido",
         },
     )
 

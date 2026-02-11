@@ -8,12 +8,26 @@
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <div>
-        <h1>Panel de Leads</h1>
-        <p>{{ total }} leads registrados</p>
+    <section class="topbar">
+      <div class="topbar-block">
+        <span class="topbar-label">Agente</span>
+        <span class="topbar-value">{{ agent_name }}</span>
       </div>
-      <a href="/export/leads.csv" class="btn-export">Descargar CSV</a>
+      <div class="topbar-block">
+        <span class="topbar-label">Fecha y hora</span>
+        <span class="topbar-value" id="topbar-clock">--</span>
+      </div>
+    </section>
+
+    <header class="header hero">
+      <div class="hero-text">
+        <span class="hero-eyebrow">Panel operativo</span>
+        <h1>Panel de Leads</h1>
+        <p class="hero-subtitle">{{ total }} leads registrados</p>
+      </div>
+      <div class="hero-actions">
+        <a href="/export/leads.csv" class="btn-export">Descargar CSV</a>
+      </div>
     </header>
 
     <section class="kpis">
@@ -108,12 +122,52 @@
     {% endif %}
   </div>
 
+  <div class="modal is-hidden" id="lead-modal" aria-hidden="true">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" type="button" id="modal-close">Cerrar</button>
+      <h2 id="modal-title">Detalle del lead</h2>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-section">
+        <h3>Respuestas</h3>
+        <div class="modal-answers" id="modal-answers"></div>
+      </div>
+      <div class="modal-section">
+        <h3>Metadata</h3>
+        <pre class="modal-code" id="modal-metadata"></pre>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const leadsData = {{ leads | tojson }};
     const searchInput = document.getElementById('search');
     const estadoSelect = document.getElementById('estado');
     const countLabel = document.getElementById('count-label');
     const table = document.getElementById('leads-table');
     const tableBody = table ? table.querySelector('tbody') : null;
+    const modal = document.getElementById('lead-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalMeta = document.getElementById('modal-meta');
+    const modalAnswers = document.getElementById('modal-answers');
+    const modalMetadata = document.getElementById('modal-metadata');
+    const modalTitle = document.getElementById('modal-title');
+    const clockEl = document.getElementById('topbar-clock');
+    const leadIndex = new Map(
+      Array.isArray(leadsData)
+        ? leadsData.map((lead) => [String(lead.lead_id), lead])
+        : []
+    );
+
+    const pad = (value) => String(value).padStart(2, '0');
+
+    const updateClock = () => {
+      if (!clockEl) return;
+      const now = new Date();
+      const formatted = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(
+        now.getHours()
+      )}:${pad(now.getMinutes())}`;
+      clockEl.textContent = formatted;
+    };
 
     const formatRelative = (ts) => {
       if (!ts) return '-';
@@ -227,6 +281,115 @@
       estadoSelect.addEventListener('change', applyFilters);
     }
 
+    const clearChildren = (node) => {
+      while (node && node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
+    };
+
+    const formatValue = (value) => {
+      if (value === null || value === undefined || value === '') return '-';
+      return String(value);
+    };
+
+    const buildMetaItem = (label, value) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-item';
+      const key = document.createElement('span');
+      key.className = 'modal-key';
+      key.textContent = label;
+      const val = document.createElement('span');
+      val.className = 'modal-value';
+      val.textContent = formatValue(value);
+      wrap.append(key, val);
+      return wrap;
+    };
+
+    const openModal = (leadId) => {
+      const lead = leadIndex.get(String(leadId));
+      if (!lead || !modal) return;
+
+      modalTitle.textContent = `Lead #${lead.lead_id || '-'}`;
+      clearChildren(modalMeta);
+      modalMeta.append(
+        buildMetaItem('Nombre', lead.nombre),
+        buildMetaItem('Telefono', lead.telefono),
+        buildMetaItem('Estado', lead.estado),
+        buildMetaItem('Scoring', lead.scoring),
+        buildMetaItem('Categoria', lead.label),
+        buildMetaItem('Origen', lead.origen),
+        buildMetaItem('Creado', lead.creado),
+        buildMetaItem('Ultimo mensaje', lead.ultimo_mensaje)
+      );
+
+      clearChildren(modalAnswers);
+      const answers = Array.isArray(lead.respuestas) ? lead.respuestas : [];
+      if (answers.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'modal-empty';
+        empty.textContent = 'Sin respuestas registradas.';
+        modalAnswers.appendChild(empty);
+      } else {
+        answers.forEach((answer) => {
+          const item = document.createElement('div');
+          item.className = 'modal-answer';
+          const label = document.createElement('span');
+          label.className = 'modal-answer-label';
+          label.textContent = answer.label || 'Respuesta';
+          const value = document.createElement('span');
+          value.className = 'modal-answer-value';
+          value.textContent = formatValue(answer.value);
+          item.append(label, value);
+          modalAnswers.appendChild(item);
+        });
+      }
+
+      const metadata =
+        lead.metadata && Object.keys(lead.metadata).length > 0
+          ? JSON.stringify(lead.metadata, null, 2)
+          : '-';
+      modalMetadata.textContent = metadata;
+
+      modal.classList.remove('is-hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+    };
+
+    const closeModal = () => {
+      if (!modal) return;
+      modal.classList.add('is-hidden');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    };
+
+    if (tableBody) {
+      tableBody.addEventListener('click', (event) => {
+        const row = event.target.closest('tr');
+        if (!row || row.classList.contains('is-hidden')) return;
+        openModal(row.dataset.id);
+      });
+    }
+
+    if (modalClose) {
+      modalClose.addEventListener('click', closeModal);
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    updateClock();
+    setInterval(updateClock, 60000);
     updateRelativeTimes();
     applyFilters();
   </script>
