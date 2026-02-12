@@ -72,6 +72,21 @@ def handle_inbound_message(
     if question is None:
         return WebhookResult(status="error", state=estado_actual, reason="missing_question")
 
+    # --- Validate answer by type ---
+    from src.domain.validators import validate_answer
+
+    is_valid, reprompt = validate_answer(text, question.validation_type)
+    if not is_valid:
+        _handle_invalid_answer(
+            db_path,
+            telefono,
+            estado_actual,
+            reprompt,
+            question,
+            correlation_id=message_id,
+        )
+        return WebhookResult(status="invalid", state=estado_actual, reason="validation_failed")
+
     new_state = advance_on_valid_answer(
         db_path,
         telefono,
@@ -137,6 +152,90 @@ def _maybe_send_next_question(
     _log_event(
         db_path,
         "lead_question_sent",
+        telefono,
+        {"question_id": question.id},
+        correlation_id=correlation_id,
+    )
+
+
+def _handle_invalid_answer(
+    db_path: str,
+    telefono: str,
+    estado_actual: int,
+    reprompt: str | None,
+    question,
+    *,
+    correlation_id: str | None = None,
+) -> None:
+    """Increment intentos_fallidos. If over MAX_ATTEMPTS, finalize session.
+    Otherwise send reprompt + repeat the question."""
+    with db_session(db_path) as conn:
+        row = conn.execute(
+            "SELECT intentos_fallidos FROM sesiones_leads WHERE telefono = ?",
+            (telefono,),
+        ).fetchone()
+        intentos = (int(row["intentos_fallidos"]) if row and row["intentos_fallidos"] else 0) + 1
+        conn.execute(
+            "UPDATE sesiones_leads SET intentos_fallidos = ? WHERE telefono = ?",
+            (intentos, telefono),
+        )
+
+    _log_event(
+        db_path,
+        "answer_validation_failed",
+        telefono,
+        {"question_id": question.id, "intentos": intentos, "validation_type": question.validation_type},
+        correlation_id=correlation_id,
+    )
+
+    if fsm.should_finalize_on_invalid(intentos):
+        from src.services.session_flow import finalize_session
+
+        finalize_session(db_path, telefono, correlation_id=correlation_id)
+        return
+
+    _maybe_send_reprompt(db_path, telefono, reprompt, question, correlation_id=correlation_id)
+
+
+def _maybe_send_reprompt(
+    db_path: str,
+    telefono: str,
+    reprompt: str | None,
+    question,
+    *,
+    correlation_id: str | None = None,
+) -> None:
+    """Send reprompt message followed by the question text again."""
+    if os.getenv("DISABLE_OUTBOUND_MESSAGES") == "1":
+        return
+
+    settings = load_base_settings()
+    config = NotificationConfig(
+        waha_base_url=settings.waha_base_url,
+        waha_api_key=settings.waha_api_key,
+        waha_session=settings.waha_session,
+        agent_name=settings.agent_name,
+        calendly_url=settings.calendly_url,
+        red_info_url=settings.red_info_url,
+    )
+
+    # Send reprompt + question as a single message
+    full_text = f"{reprompt}\n\n{question.text}" if reprompt else question.text
+    try:
+        send_whatsapp_text(telefono, full_text, config=config)
+    except Exception as exc:  # pragma: no cover - network error
+        _log_event(
+            db_path,
+            "reprompt_failed",
+            telefono,
+            {"question_id": question.id, "error": str(exc)},
+            correlation_id=correlation_id,
+        )
+        return
+
+    _log_event(
+        db_path,
+        "reprompt_sent",
         telefono,
         {"question_id": question.id},
         correlation_id=correlation_id,

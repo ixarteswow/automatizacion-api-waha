@@ -114,6 +114,12 @@ def create_lead_session(
             correlation_id=message_id,
         )
 
+    # --- Send intro message ---
+    try:
+        _send_intro_message(telefono_store, nombre_clean)
+    except Exception:  # pragma: no cover - network errors
+        pass  # don't block the flow if intro fails
+
     question = QUESTIONS_BY_ID.get(fsm.MIN_STATE)
     if question is None:
         return LeadCreateResult(
@@ -206,6 +212,26 @@ def _find_existing_session(conn, candidates: Iterable[str]):
         LIMIT 1
     """
     return conn.execute(query, tuple(candidates_list)).fetchone()
+
+
+def _send_intro_message(telefono: str, nombre: str) -> None:
+    settings = load_base_settings()
+    agent = settings.agent_name or "el agente"
+    intro = (
+        f"¡Hola {nombre}! Soy {agent}, te contacto porque mostraste "
+        f"interés en uno de nuestros inmuebles. "
+        f"Para poder valorar tu perfil, te haré unas breves preguntas. "
+        f"¡Gracias por tu tiempo!"
+    )
+    config = NotificationConfig(
+        waha_base_url=settings.waha_base_url,
+        waha_api_key=settings.waha_api_key,
+        waha_session=settings.waha_session,
+        agent_name=settings.agent_name,
+        calendly_url=settings.calendly_url,
+        red_info_url=settings.red_info_url,
+    )
+    send_whatsapp_text(telefono, intro, config=config)
 
 
 def _send_first_question(telefono: str, text: str) -> None:

@@ -135,3 +135,42 @@ def test_handle_inbound_message_idempotent_insert(tmp_path, monkeypatch):
 
     assert first.status == "ok"
     assert second.status == "duplicate"
+
+
+def test_handle_inbound_message_invalid_bool_does_not_advance(tmp_path, monkeypatch):
+    """Sending 'quizás' to a bool question should return 'invalid' and NOT advance the state."""
+    db_path = tmp_path / "app.db"
+    _init_db(db_path)
+    monkeypatch.setenv("PROPERTY_RENT_EUR", "700")
+    monkeypatch.setenv("PROPERTY_SQM", "60")
+    monkeypatch.setenv("DISABLE_OUTBOUND_MESSAGES", "1")
+
+    telefono = "+34600000099"
+    conn = sqlite3.connect(str(db_path))
+    try:
+        _insert_session(conn, telefono, 2)  # Q2 = fumador, validation_type=bool
+    finally:
+        conn.close()
+
+    result = handle_inbound_message(
+        str(db_path),
+        message_id="invalid-msg-1",
+        telefono=telefono,
+        text="quizás",
+    )
+
+    assert result.status == "invalid"
+    assert result.state == 2  # state did NOT advance
+    assert result.reason == "validation_failed"
+
+    # Verify intentos_fallidos was incremented
+    conn = sqlite3.connect(str(db_path))
+    try:
+        row = conn.execute(
+            "SELECT intentos_fallidos FROM sesiones_leads WHERE telefono = ?",
+            (telefono,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    assert row[0] == 1

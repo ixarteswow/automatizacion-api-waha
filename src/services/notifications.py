@@ -20,20 +20,27 @@ class NotificationConfig:
 
 def build_notification_text(label: str, config: NotificationConfig) -> tuple[str | None, str | None]:
     label_norm = label.strip().upper()
+    agent = config.agent_name or "el agente"
 
     if label_norm == "GOLD":
         if not config.calendly_url:
             return None, "missing_calendly_url"
         return (
-            f"¡Enhorabuena! Tu perfil encaja muy bien. "
-            f"Puedes reservar tu visita aquí: {config.calendly_url}",
+            f"🏆 ¡Excelente noticia! Tu perfil cumple todos los requisitos. "
+            f"{agent} te invita a reservar una visita al inmueble directamente "
+            f"en el siguiente enlace:\n\n"
+            f"📅 {config.calendly_url}\n\n"
+            f"¡Te esperamos!",
             None,
         )
 
     if label_norm == "SILVER":
-        agent = config.agent_name or "el agente"
         return (
-            f"Gracias. {agent} revisará tu solicitud y se pondrá en contacto lo antes posible.",
+            f"✅ Gracias por completar la encuesta. Tu perfil es interesante y "
+            f"nos gustaría conocerte mejor. {agent} revisará tu solicitud "
+            f"personalmente y te contactará en las próximas horas para los "
+            f"siguientes pasos.\n\n"
+            f"¡Estate atento/a!",
             None,
         )
 
@@ -41,9 +48,13 @@ def build_notification_text(label: str, config: NotificationConfig) -> tuple[str
         if not config.red_info_url:
             return None, "missing_red_info_url"
         return (
-            "Gracias por tu interés. En este momento no contamos con una opción que encaje "
-            "bien con tus necesidades, pero para ayudarte te dejo este enlace con información "
-            f"y alternativas disponibles: {config.red_info_url}",
+            f"Gracias por tu tiempo y tu interés. Tras valorar tu perfil, "
+            f"en este momento no disponemos de una opción que encaje bien "
+            f"con tus necesidades actuales.\n\n"
+            f"Te dejamos este enlace con información y alternativas "
+            f"que podrían interesarte:\n"
+            f"🔗 {config.red_info_url}\n\n"
+            f"Te deseamos mucha suerte.",
             None,
         )
 

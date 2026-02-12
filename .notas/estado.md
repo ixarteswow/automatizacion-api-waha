@@ -104,3 +104,11 @@ Fecha: 2026-02-11
 ## Siguiente paso al retomar
 - Validar UX/UI de `Aurum Ledger` con datos reales y ajustar columnas, contraste y orden del modal.
 - Continuar decision de estrategia de reporting externo (Apps Script vs dashboard + CSV).
+
+## Plan proxima sesion
+1. Documentar como flujo oficial: correo `Idealista` no leido -> extraccion nombre/telefono -> encuesta WhatsApp 6 preguntas -> scoring -> dashboard.
+2. Agregar mensaje de introduccion previo a la pregunta 1.
+3. Implementar validacion por tipo de respuesta antes de cambiar de estado.
+4. Garantizar mensaje final diferenciado por categoria (`GOLD`, `SILVER`, `RED/otra`).
+5. Ejecutar prueba real con evidencias en logs + DB + dashboard.
+6. Definir coordinacion con `/agent` (roles, archivos por agente y regla de no pisarse cambios).

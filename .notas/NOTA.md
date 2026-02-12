@@ -66,3 +66,12 @@ Fecha: 2026-02-11
 - Nota: Se aplico rediseño premium en CSS vanilla sin frameworks.
 - Error resuelto: No se reflejaban cambios en UI por imagen vieja del contenedor `api` -> rebuild con `docker compose up -d --build api` + hard refresh.
 - Nota: Cambios subidos a GitHub en `main` (commit `21b3835`).
+
+---
+
+Fecha: 2026-02-11
+- Plan proxima sesion registrado:
+- Flujo oficial E2E desde IMAP (`Idealista`) hasta dashboard confirmado.
+- Pendiente mensaje de introduccion previo a pregunta 1.
+- Pendiente validacion por tipo de respuesta antes de avanzar FSM.
+- Pendiente reforzar mensaje final por categoria (`GOLD`, `SILVER`, `RED/otra`) y testear en corrida real.
