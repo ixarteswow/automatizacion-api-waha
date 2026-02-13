@@ -64,15 +64,17 @@ def get_estados(db_path: str) -> list[str]:
     return [str(row[0]) for row in rows]
 
 
-def get_lead_stats(db_path: str) -> dict[str, int]:
+def get_lead_stats(db_path: str) -> dict[str, Any]:
     with db_session(db_path) as conn:
         rows = conn.execute("SELECT scoring FROM sesiones_leads").fetchall()
     gold = silver = red = none = 0
+    scored_values: list[float] = []
     for row in rows:
         score = row["scoring"]
         if score is None:
             none += 1
             continue
+        scored_values.append(float(score))
         label = _scoring_label(score)
         if label == "GOLD":
             gold += 1
@@ -81,12 +83,19 @@ def get_lead_stats(db_path: str) -> dict[str, int]:
         else:
             red += 1
     total = gold + silver + red + none
+    completed = gold + silver + red
+    conversion = round((completed / total) * 100, 1) if total > 0 else 0.0
+    avg_scoring = round(sum(scored_values) / len(scored_values), 1) if scored_values else 0.0
     return {
         "total": total,
         "gold": gold,
         "silver": silver,
         "red": red,
         "none": none,
+        "completed": completed,
+        "in_progress": none,
+        "conversion_rate": conversion,
+        "avg_scoring": avg_scoring,
     }
 
 

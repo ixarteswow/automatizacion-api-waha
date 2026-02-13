@@ -147,7 +147,7 @@ body::before {
 
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
   margin-top: 1.75rem;
   animation: fadeUp 0.7s ease both;
@@ -194,6 +194,31 @@ body::before {
 .kpi-card.kpi-gold { --accent-color: #b08a2a; }
 .kpi-card.kpi-silver { --accent-color: #94a3b8; }
 .kpi-card.kpi-red { --accent-color: #b91c1c; }
+.kpi-card.kpi-progress { --accent-color: #2563eb; }
+.kpi-card.kpi-conversion { --accent-color: #0d9488; }
+.kpi-card.kpi-avg { --accent-color: #7c3aed; }
+
+.chart-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+  animation: fadeUp 0.7s ease both;
+  animation-delay: 0.12s;
+}
+
+.chart-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
 
 .kpi-number {
   font-size: 2.1rem;
@@ -339,6 +364,7 @@ tbody tr {
 .badge-gold { background: rgba(176, 138, 42, 0.15); color: #7a5a11; }
 .badge-silver { background: rgba(148, 163, 184, 0.2); color: #475569; }
 .badge-red { background: rgba(185, 28, 28, 0.15); color: #7f1d1d; }
+.badge-progress { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
 .badge-none { background: rgba(148, 163, 184, 0.2); color: #6b7280; }
 
 .score-bar-wrap {
