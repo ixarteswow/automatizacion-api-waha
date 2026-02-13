@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Leads</title>
-    <link rel="stylesheet" href="/static/style.css?v=20260213">
+    <link rel="stylesheet" href="/static/style.css?v=20260213b">
 </head>
 <body>
   <div class="container">
@@ -12,6 +12,10 @@
       <div class="topbar-block">
         <span class="topbar-label">Agente</span>
         <span class="topbar-value">{{ agent_name }}</span>
+      </div>
+      <div class="topbar-block topbar-status">
+        <span class="status-dot"></span>
+        <span class="topbar-value status-text">Escuchando</span>
       </div>
       <div class="topbar-block">
         <span class="topbar-label">Fecha y hora</span>
