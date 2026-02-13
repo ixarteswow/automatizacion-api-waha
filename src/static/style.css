@@ -198,13 +198,20 @@ body::before {
 .kpi-card.kpi-conversion { --accent-color: #0d9488; }
 .kpi-card.kpi-avg { --accent-color: #7c3aed; }
 
-.chart-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  margin-top: 1.5rem;
-  padding: 1.5rem;
+.kpis-row1 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.kpis-row2 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 420px;
+  margin-top: 1rem;
+}
+
+/* --- Distribution bar --- */
+.distribution-bar-section {
+  margin-top: 1.2rem;
+  padding: 1.2rem 1.4rem;
   background: var(--card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--line);
@@ -214,11 +221,51 @@ body::before {
   animation-delay: 0.12s;
 }
 
-.chart-container {
-  position: relative;
-  width: 220px;
-  height: 220px;
+.distribution-bar {
+  display: flex;
+  height: 18px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.06);
 }
+
+.dist-segment {
+  min-width: 4px;
+  transition: width 0.5s ease;
+}
+
+.dist-gold { background: #b08a2a; }
+.dist-silver { background: #94a3b8; }
+.dist-red { background: #b91c1c; }
+.dist-progress { background: #2563eb; }
+
+.distribution-legend {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.7rem;
+  justify-content: center;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-gold { background: #b08a2a; }
+.dot-silver { background: #94a3b8; }
+.dot-red { background: #b91c1c; }
+.dot-progress { background: #2563eb; }
 
 .kpi-number {
   font-size: 2.1rem;

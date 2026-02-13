@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Leads</title>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -31,7 +30,7 @@
       </div>
     </header>
 
-    <section class="kpis">
+    <section class="kpis kpis-row1">
       <div class="kpi-card kpi-total">
         <span class="kpi-number">{{ stats.total }}</span>
         <span class="kpi-label">Total</span>
@@ -52,6 +51,26 @@
         <span class="kpi-number">{{ stats.in_progress }}</span>
         <span class="kpi-label">En curso</span>
       </div>
+    </section>
+
+    <section class="distribution-bar-section">
+      <div class="distribution-bar" id="distribution-bar">
+        {% if stats.total > 0 %}
+        <div class="dist-segment dist-gold" style="width: {{ (stats.gold / stats.total * 100)|round(1) }}%" title="Gold: {{ stats.gold }}"></div>
+        <div class="dist-segment dist-silver" style="width: {{ (stats.silver / stats.total * 100)|round(1) }}%" title="Silver: {{ stats.silver }}"></div>
+        <div class="dist-segment dist-red" style="width: {{ (stats.red / stats.total * 100)|round(1) }}%" title="Red: {{ stats.red }}"></div>
+        <div class="dist-segment dist-progress" style="width: {{ (stats.in_progress / stats.total * 100)|round(1) }}%" title="En curso: {{ stats.in_progress }}"></div>
+        {% endif %}
+      </div>
+      <div class="distribution-legend">
+        <span class="legend-item"><span class="legend-dot dot-gold"></span>Gold</span>
+        <span class="legend-item"><span class="legend-dot dot-silver"></span>Silver</span>
+        <span class="legend-item"><span class="legend-dot dot-red"></span>Red</span>
+        <span class="legend-item"><span class="legend-dot dot-progress"></span>En curso</span>
+      </div>
+    </section>
+
+    <section class="kpis kpis-row2">
       <div class="kpi-card kpi-conversion">
         <span class="kpi-number">{{ stats.conversion_rate }}%</span>
         <span class="kpi-label">Conversión</span>
@@ -60,13 +79,6 @@
         <span class="kpi-number">{{ stats.avg_scoring }}</span>
         <span class="kpi-label">Score medio</span>
       </div>
-    </section>
-
-    <section class="chart-section">
-      <div class="chart-container">
-        <canvas id="donut-chart"></canvas>
-      </div>
-      <div class="chart-legend" id="chart-legend"></div>
     </section>
 
     <section class="toolbar">
@@ -412,73 +424,6 @@
     setInterval(updateClock, 60000);
     updateRelativeTimes();
     applyFilters();
-
-    /* ---------- Donut Chart ---------- */
-    const chartData = {
-      gold: {{ stats.gold }},
-      silver: {{ stats.silver }},
-      red: {{ stats.red }},
-      inProgress: {{ stats.in_progress }}
-    };
-
-    const donutCanvas = document.getElementById('donut-chart');
-    if (donutCanvas) {
-      const hasData = Object.values(chartData).some(v => v > 0);
-      if (hasData) {
-        new Chart(donutCanvas, {
-          type: 'doughnut',
-          data: {
-            labels: ['Gold', 'Silver', 'Red', 'En curso'],
-            datasets: [{
-              data: [chartData.gold, chartData.silver, chartData.red, chartData.inProgress],
-              backgroundColor: [
-                '#b8860b',
-                '#6b7280',
-                '#b91c1c',
-                '#2563eb'
-              ],
-              borderColor: '#1a1a2e',
-              borderWidth: 2,
-              hoverOffset: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-              legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                  color: '#9ca3af',
-                  padding: 16,
-                  usePointStyle: true,
-                  pointStyleWidth: 12,
-                  font: { size: 13, family: 'Inter, system-ui, sans-serif' }
-                }
-              },
-              tooltip: {
-                backgroundColor: '#1f2937',
-                titleColor: '#f9fafb',
-                bodyColor: '#d1d5db',
-                borderColor: '#374151',
-                borderWidth: 1,
-                cornerRadius: 8,
-                padding: 12,
-                callbacks: {
-                  label: (ctx) => {
-                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                    const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
-                    return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
-                  }
-                }
-              }
-            }
-          }
-        });
-      }
-    }
   </script>
 </body>
 </html>
