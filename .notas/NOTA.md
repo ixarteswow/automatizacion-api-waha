@@ -75,3 +75,26 @@ Fecha: 2026-02-11
 - Pendiente mensaje de introduccion previo a pregunta 1.
 - Pendiente validacion por tipo de respuesta antes de avanzar FSM.
 - Pendiente reforzar mensaje final por categoria (`GOLD`, `SILVER`, `RED/otra`) y testear en corrida real.
+
+---
+
+Fecha: 2026-02-12
+- Hecho: Mensaje de introduccion implementado (`_send_intro_message()` en `lead_intake.py`).
+- Hecho: Modulo `src/domain/validators.py` con validacion bool/number/text.
+- Hecho: Gate de validacion + reprompt en `webhook_handler.py` (max 3 intentos).
+- Hecho: Mensajes finales mejorados con emojis (GOLD/SILVER/RED) en `notifications.py`.
+- Hecho: 24 tests en verde (11 nuevos en `test_validators.py`).
+- Hecho: E2E real exitoso: intro + 6 preguntas + scoring + notificacion en WhatsApp.
+- Bug resuelto: Lead duplicado (telefono ya en estado 99) → script `cleanup_test_phone.py`.
+- Bug resuelto: WAHA sin sesion activa tras reinicio contenedor → re-escanear QR.
+- Bug resuelto: Webhook URL se pierde al reiniciar WAHA → re-configurar manualmente.
+- Decision: No integrar IA por ahora; validacion regex cubre ~90% de casos.
+- Commit: `eb7fc04` pusheado a `main`.
+
+## Proxima sesion (pendiente)
+1. Automatizar registro de webhook URL en arranque de WAHA.
+2. Probar con multiples leads reales (3-5 correos Idealista distintos).
+3. Revisar falsos negativos de validacion regex con leads reales.
+4. Mejoras de dashboard: graficos de conversion, metricas por periodo.
+5. Notificaciones al agente cuando un lead es GOLD.
+
