@@ -56,10 +56,14 @@
     <section class="distribution-bar-section">
       <div class="distribution-bar" id="distribution-bar">
         {% if stats.total > 0 %}
-        <div class="dist-segment dist-gold" style="width: {{ (stats.gold / stats.total * 100)|round(1) }}%" title="Gold: {{ stats.gold }}"></div>
-        <div class="dist-segment dist-silver" style="width: {{ (stats.silver / stats.total * 100)|round(1) }}%" title="Silver: {{ stats.silver }}"></div>
-        <div class="dist-segment dist-red" style="width: {{ (stats.red / stats.total * 100)|round(1) }}%" title="Red: {{ stats.red }}"></div>
-        <div class="dist-segment dist-progress" style="width: {{ (stats.in_progress / stats.total * 100)|round(1) }}%" title="En curso: {{ stats.in_progress }}"></div>
+        {% set gold_pct = (stats.gold / stats.total * 100)|round(1) %}
+        {% set silver_pct = (stats.silver / stats.total * 100)|round(1) %}
+        {% set red_pct = (stats.red / stats.total * 100)|round(1) %}
+        {% set progress_pct = (stats.in_progress / stats.total * 100)|round(1) %}
+        <div class="dist-segment dist-gold" style="width: {{ gold_pct }}%" title="Gold: {{ stats.gold }} ({{ gold_pct }}%)">{% if gold_pct >= 8 %}{{ gold_pct }}%{% endif %}</div>
+        <div class="dist-segment dist-silver" style="width: {{ silver_pct }}%" title="Silver: {{ stats.silver }} ({{ silver_pct }}%)">{% if silver_pct >= 8 %}{{ silver_pct }}%{% endif %}</div>
+        <div class="dist-segment dist-red" style="width: {{ red_pct }}%" title="Red: {{ stats.red }} ({{ red_pct }}%)">{% if red_pct >= 8 %}{{ red_pct }}%{% endif %}</div>
+        <div class="dist-segment dist-progress" style="width: {{ progress_pct }}%" title="En curso: {{ stats.in_progress }} ({{ progress_pct }}%)">{% if progress_pct >= 8 %}{{ progress_pct }}%{% endif %}</div>
         {% endif %}
       </div>
       <div class="distribution-legend">
