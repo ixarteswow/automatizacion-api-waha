@@ -102,7 +102,17 @@ def _search_unseen(imap, subject_keyword: str) -> tuple[str, list[Any]]:
 def run_forever(settings: ImapSettings) -> None:
     while True:
         run_once(settings)
+        _send_heartbeat(settings.leads_api_url)
         time.sleep(settings.poll_seconds)
+
+
+def _send_heartbeat(base_url: str) -> None:
+    try:
+        url = f"{base_url.rstrip('/leads')}/internal/heartbeat"
+        # Use a short timeout so we don't block the polling loop
+        httpx.post(url, json={"status": "alive"}, timeout=2.0)
+    except Exception as exc:
+        log_json("warning", "heartbeat_failed", error=str(exc))
 
 
 def _process_message(imap, msg_id: bytes, settings: ImapSettings) -> bool:

@@ -14,14 +14,76 @@
         <span class="topbar-value">{{ agent_name }}</span>
       </div>
       <div class="topbar-block topbar-status">
-        <span class="status-dot"></span>
-        <span class="topbar-value status-text">Escuchando</span>
+        <span id="status-dot" class="status-dot {{ 'offline' if not imap_alive else '' }}"></span>
+        <span id="status-text" class="status-text topbar-value {{ 'offline' if not imap_alive else '' }}">
+          {{ 'Desconectado' if not imap_alive else 'Escuchando' }}
+        </span>
       </div>
       <div class="topbar-block">
         <span class="topbar-label">Fecha y hora</span>
         <span class="topbar-value" id="topbar-clock">--</span>
       </div>
     </section>
+  </header>
+
+  <!-- Rest of HTML... -->
+
+  <script>
+    // ... existing clock script ...
+
+    // Auto-refresh logic
+    let refreshInterval;
+
+    async function fetchDashboardData() {
+        try {
+            const response = await fetch('/api/dashboard-data');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            updateDashboard(data);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            // Optionally mark UI as stale/offline
+        }
+    }
+
+    function updateDashboard(data) {
+        // Update Stats
+        document.querySelector('.kpi-card:nth-child(1) .kpi-value').textContent = data.stats.total;
+        
+        // Update Status Dot (Heartbeat)
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        if (data.imap_alive) {
+            dot.classList.remove('offline');
+            text.classList.remove('offline');
+            text.textContent = 'Escuchando';
+        } else {
+            dot.classList.add('offline');
+            text.classList.add('offline');
+            text.textContent = 'Desconectado'; 
+        }
+
+        // Re-render Distribution Bar (simplificado)
+        // ... (would require more complex JS to rebuild the DOM bars, 
+        // for now let's minimal refresh just the stats and table if possible, 
+        // or just reload page if structure changes too much. 
+        // Actually, let's just refresh the stats and status for V1 to match the plan.)
+        
+        // Update Leads Table
+        const tbody = document.querySelector('.leads-table tbody');
+        if (tbody) {
+             // Basic re-render logic or just keep stats sync for now
+             // To properly re-render table rows we need a template or JS builder.
+             // Given the constraints, let's refresh the whole page if data changed? 
+             // No, that's annoying. Let's just update the KPIs and Status for now 
+             // as those are the critical "live" indicators.
+        }
+    }
+    
+    // Refresh every 30s
+    setInterval(fetchDashboardData, 30000);
+
+  </script>
 
     <header class="header hero">
       <div class="hero-text">

@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import json
 import os
+import time
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
@@ -130,6 +129,47 @@ def export_table(
     }
 
 
+# In-memory store for IMAP listener heartbeat (timestamp)
+_imap_last_heartbeat: float | None = None
+
+
+@app.post("/internal/heartbeat")
+def receive_heartbeat(payload: dict[str, Any]):
+    global _imap_last_heartbeat
+    _imap_last_heartbeat = time.time()
+    return {"status": "ok"}
+
+
+@app.get("/api/dashboard-data")
+def dashboard_data(estado: str | None = None):
+    settings = load_base_settings()
+    leads = get_leads(settings.db_path, estado)
+    stats = get_lead_stats(settings.db_path)
+    # Check if listener is alive (heartbeat within last 120s)
+    now = time.time()
+    is_alive = (
+        _imap_last_heartbeat is not None and (now - _imap_last_heartbeat) < 120
+    )
+    last_seen = "nunca"
+    if _imap_last_heartbeat:
+        seconds_ago = int(now - _imap_last_heartbeat)
+        if seconds_ago < 60:
+            last_seen = f"hace {seconds_ago} s"
+        elif seconds_ago < 3600:
+            last_seen = f"hace {seconds_ago // 60} min"
+        else:
+            last_seen = "hace >1h"
+
+    return {
+        "stats": stats,
+        "leads": leads,
+        "total": stats["total"],
+        "filtered_count": len(leads),
+        "imap_alive": is_alive,
+        "imap_last_seen": last_seen,
+    }
+
+
 @app.get("/")
 def dashboard(request: Request, estado: str | None = None):
     settings = load_base_settings()
@@ -138,6 +178,20 @@ def dashboard(request: Request, estado: str | None = None):
     stats = get_lead_stats(settings.db_path)
     total_count = stats["total"]
     filtered_count = len(leads)
+    
+    # Check if listener is alive (heartbeat within last 120s)
+    now = time.time()
+    is_alive = (
+        _imap_last_heartbeat is not None and (now - _imap_last_heartbeat) < 120
+    )
+    last_seen = "nunca"
+    if _imap_last_heartbeat:
+        seconds_ago = int(now - _imap_last_heartbeat)
+        if seconds_ago < 60:
+            last_seen = f"hace {seconds_ago} s"
+        else:
+            last_seen = f"hace {seconds_ago // 60} min"
+
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -149,6 +203,8 @@ def dashboard(request: Request, estado: str | None = None):
             "estados": estados,
             "estado_actual": estado or "",
             "agent_name": settings.agent_name or "Agente no definido",
+            "imap_alive": is_alive,
+            "imap_last_seen": last_seen,
         },
     )
 
