@@ -1,0 +1,40 @@
+services:
+  api:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  imap-listener:
+    build: .
+    env_file:
+      - .env
+    command: ["python", "scripts/imap_listener.py"]
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  waha:
+    image: ${WAHA_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "${WAHA_PORT}:${WAHA_PORT}"
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=${WHATSAPP_DEFAULT_ENGINE}
+      - WHATSAPP_RESTART_ALL_SESSIONS=True
+      - WHATSAPP_HOOK_URL=http://api:8000/waha/message
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_DASHBOARD_USERNAME=${WAHA_DASHBOARD_USERNAME}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_DASHBOARD_PASSWORD}
+    volumes:
+      - waha_sessions:/app/.sessions
+    depends_on:
+      - api
+
+volumes:
+  waha_sessions:
+    name: waha_sessions_whatsapp_auto_python_codex
