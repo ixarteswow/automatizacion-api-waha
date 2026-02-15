@@ -1,0 +1,253 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.3.3, pluggy-1.6.0
+rootdir: C:\Users\Personal\Documents\PROGRAMACION\docker-uses\proyectos\proyecto-automatizacion\whatsapp-auto-python-codex
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.11.0
+collected 68 items
+
+tests\test_api.py ....................                                   [ 29%]
+tests\test_auth.py FF                                                    [ 32%]
+tests\test_dashboard.py ..FFF                                            [ 39%]
+tests\test_fsm.py ...                                                    [ 44%]
+tests\test_imap_listener.py .....                                        [ 51%]
+tests\test_lead_profile_builder.py ..                                    [ 54%]
+tests\test_notifications.py ......                                       [ 63%]
+tests\test_scoring.py ..                                                 [ 66%]
+tests\test_session_flow.py ..                                            [ 69%]
+tests\test_session_scoring.py ..                                         [ 72%]
+tests\test_validators.py ................                                [ 95%]
+tests\test_webhook_handler.py ...                                        [100%]
+
+================================== FAILURES ===================================
+________________________ test_dashboard_requires_auth _________________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-32/test_dashboard_requires_auth0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021BDEE344A0>
+
+    def test_dashboard_requires_auth(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+    
+        # Init DB schema
+        conn = sqlite3.connect(str(db_path))
+        # minimal schema just to not fail on get_leads
+        conn.execute("CREATE TABLE leads (telefono TEXT PRIMARY KEY, nombre TEXT, origen TEXT, metadata TEXT, created_at INTEGER)")
+        conn.execute("CREATE TABLE sesiones_leads (telefono TEXT PRIMARY KEY, estado_actual INTEGER, respuestas_clean TEXT, intentos_fallidos INTEGER, ultimo_mensaje_ts INTEGER, metadata TEXT, created_at INTEGER, updated_at INTEGER, scoring REAL, finalizado_en INTEGER)")
+        conn.commit()
+        conn.close()
+    
+        monkeypatch.setenv("DB_PATH", str(db_path))
+        monkeypatch.setenv("DASHBOARD_USERNAME", "admin")
+        monkeypatch.setenv("DASHBOARD_PASSWORD", "secret")
+    
+        client = TestClient(app)
+    
+        # 1. No credentials -> 401
+        response = client.get("/")
+        assert response.status_code == 401
+        assert "WWW-Authenticate" in response.headers
+        assert response.headers["WWW-Authenticate"] == "Basic"
+    
+        response = client.get("/api/dashboard-data")
+        assert response.status_code == 401
+    
+        # 2. Wrong credentials -> 401
+        response = client.get("/", auth=("admin", "wrong"))
+        assert response.status_code == 401
+    
+        # 3. Correct credentials -> 200
+>       response = client.get("/", auth=("admin", "secret"))
+
+tests\test_auth.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:518: in get
+    return super().get(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1053: in get
+    return self.request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:488: in request
+    return super().request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:381: in handle_request
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:378: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:321: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:252: in _call_func
+    retval = await retval_or_awaitable
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:187: in __call__
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:165: in __call__
+    await self.app(scope, receive, _send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\exceptions.py:62: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:715: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:735: in app
+    await route.handle(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:288: in handle
+    await self.app(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:76: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:73: in app
+    response = await f(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:301: in app
+    raw_response = await run_endpoint_function(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:214: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\concurrency.py:39: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\to_thread.py:56: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:2485: in run_sync_in_worker_thread
+    return await future
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:976: in run
+    result = context.run(func, *args)
+src\api.py:210: in dashboard
+    leads = get_leads(settings.db_path, estado)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+db_path = 'C:\\Users\\Personal\\AppData\\Local\\Temp\\pytest-of-Personal\\pytest-32\\test_dashboard_requires_auth0\\app.db'
+estado = None
+
+    def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
+        query = (
+            "SELECT id, telefono, nombre, origen, estado_actual, scoring, creado_en, "
+            "ultimo_mensaje_ts, respuestas_clean, metadata "
+            "FROM sesiones_leads"
+        )
+        params: list[object] = []
+        if estado:
+            try:
+                estado_value = int(estado)
+            except ValueError:
+                return []
+            query += " WHERE estado_actual = ?"
+            params.append(estado_value)
+        query += " ORDER BY id DESC"
+    
+        with db_session(db_path) as conn:
+>           rows = conn.execute(query, tuple(params)).fetchall()
+E           sqlite3.OperationalError: no such column: id
+
+src\services\dashboard_service.py:32: OperationalError
+_________________ test_dashboard_open_if_no_creds_configured __________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-32/test_dashboard_open_if_no_cred0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021BDEE37B60>
+
+    def test_dashboard_open_if_no_creds_configured(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+            # Init DB schema
+        conn = sqlite3.connect(str(db_path))
+        # minimal schema just to not fail on get_leads
+        conn.execute("CREATE TABLE leads (telefono TEXT PRIMARY KEY, nombre TEXT, origen TEXT, metadata TEXT, created_at INTEGER)")
+        conn.execute("CREATE TABLE sesiones_leads (telefono TEXT PRIMARY KEY, estado_actual INTEGER, respuestas_clean TEXT, intentos_fallidos INTEGER, ultimo_mensaje_ts INTEGER, metadata TEXT, created_at INTEGER, updated_at INTEGER, scoring REAL, finalizado_en INTEGER)")
+        conn.commit()
+        conn.close()
+    
+        monkeypatch.setenv("DB_PATH", str(db_path))
+        monkeypatch.delenv("DASHBOARD_USERNAME", raising=False)
+        monkeypatch.delenv("DASHBOARD_PASSWORD", raising=False)
+    
+        client = TestClient(app)
+    
+        # Should allow access as "admin"
+        response = client.get("/")
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests\test_auth.py:63: AssertionError
+_________________________ test_dashboard_returns_html _________________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-32/test_dashboard_returns_html0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021BDEE47B90>
+
+    def test_dashboard_returns_html(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+        _init_db(db_path)
+        monkeypatch.setenv("DB_PATH", str(db_path))
+    
+        client = TestClient(app)
+        response = client.get("/")
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests\test_dashboard.py:93: AssertionError
+__________________ test_dashboard_filter_nonexistent_estado ___________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-32/test_dashboard_filter_nonexist0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021BDEE46690>
+
+    def test_dashboard_filter_nonexistent_estado(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+        _init_db(db_path)
+        monkeypatch.setenv("DB_PATH", str(db_path))
+    
+        client = TestClient(app)
+        response = client.get("/?estado=inexistente")
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests\test_dashboard.py:106: AssertionError
+_____________________ test_dashboard_contains_export_link _____________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-32/test_dashboard_contains_export0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021BDEEDDD30>
+
+    def test_dashboard_contains_export_link(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+        _init_db(db_path)
+        monkeypatch.setenv("DB_PATH", str(db_path))
+    
+        client = TestClient(app)
+        response = client.get("/")
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests\test_dashboard.py:118: AssertionError
+============================== warnings summary ===============================
+..\..\..\..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\formparsers.py:12
+  C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_auth.py::test_dashboard_requires_auth - sqlite3.Operational...
+FAILED tests/test_auth.py::test_dashboard_open_if_no_creds_configured - asser...
+FAILED tests/test_dashboard.py::test_dashboard_returns_html - assert 401 == 200
+FAILED tests/test_dashboard.py::test_dashboard_filter_nonexistent_estado - as...
+FAILED tests/test_dashboard.py::test_dashboard_contains_export_link - assert ...
+================== 5 failed, 63 passed, 1 warning in 17.73s ===================

@@ -140,8 +140,48 @@ def receive_heartbeat(payload: dict[str, Any]):
     return {"status": "ok"}
 
 
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
+
+security = HTTPBasic(auto_error=False)
+
+def get_current_username(credentials: HTTPBasicCredentials | None = Depends(security)):
+    settings = load_base_settings()
+    correct_username = settings.dashboard_username
+    correct_password = settings.dashboard_password
+    
+    # If auth is NOT configured, allow access (return dummy user)
+    if not correct_username or not correct_password:
+        return "admin"
+
+    # If auth IS configured, credentials must be present
+    if not credentials:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = correct_username.encode("utf8")
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = correct_password.encode("utf8")
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 @app.get("/api/dashboard-data")
-def dashboard_data(estado: str | None = None):
+def dashboard_data(estado: str | None = None, username: str = Depends(get_current_username)):
     settings = load_base_settings()
     leads = get_leads(settings.db_path, estado)
     stats = get_lead_stats(settings.db_path)
@@ -171,7 +211,7 @@ def dashboard_data(estado: str | None = None):
 
 
 @app.get("/")
-def dashboard(request: Request, estado: str | None = None):
+def dashboard(request: Request, estado: str | None = None, username: str = Depends(get_current_username)):
     settings = load_base_settings()
     leads = get_leads(settings.db_path, estado)
     estados = get_estados(settings.db_path)

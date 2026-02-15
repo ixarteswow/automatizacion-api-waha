@@ -7,6 +7,9 @@ services:
       - ./data:/app/data
     ports:
       - "8000:8000"
+    environment:
+      - DASHBOARD_USERNAME=${DASHBOARD_USERNAME}
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
     restart: unless-stopped
 
   imap-listener:

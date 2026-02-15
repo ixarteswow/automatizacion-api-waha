@@ -1,0 +1,356 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.3.3, pluggy-1.6.0 -- C:\Users\Personal\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Personal\Documents\PROGRAMACION\docker-uses\proyectos\proyecto-automatizacion\whatsapp-auto-python-codex
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.11.0
+collecting ... collected 68 items
+
+tests/test_api.py::test_api_webhook_happy_path PASSED                    [  1%]
+tests/test_api.py::test_api_webhook_duplicate_message PASSED             [  2%]
+tests/test_api.py::test_api_webhook_ignores_non_text PASSED              [  4%]
+tests/test_api.py::test_api_webhook_nested_payload PASSED                [  5%]
+tests/test_api.py::test_api_webhook_ignores_from_me PASSED               [  7%]
+tests/test_api.py::test_api_webhook_real_payload_shape PASSED            [  8%]
+tests/test_api.py::test_api_webhook_prefers_remote_jid_alt PASSED        [ 10%]
+tests/test_api.py::test_api_webhook_timestamp_normalization_ms PASSED    [ 11%]
+tests/test_api.py::test_api_webhook_timestamp_normalization_seconds PASSED [ 13%]
+tests/test_api.py::test_api_create_lead_happy_path PASSED                [ 14%]
+tests/test_api.py::test_api_create_lead_duplicate PASSED                 [ 16%]
+tests/test_api.py::test_api_create_lead_missing_phone PASSED             [ 17%]
+tests/test_api.py::test_api_create_lead_e164_normalization PASSED        [ 19%]
+tests/test_api.py::test_api_create_lead_short_phone_prefix PASSED        [ 20%]
+tests/test_api.py::test_export_requires_api_key PASSED                   [ 22%]
+tests/test_api.py::test_export_pagination_cursor PASSED                  [ 23%]
+tests/test_api.py::test_export_invalid_cursor PASSED                     [ 25%]
+tests/test_api.py::test_export_unknown_table PASSED                      [ 26%]
+tests/test_api.py::test_export_without_scoring_env PASSED                [ 27%]
+tests/test_api.py::test_scoring_without_env_raises PASSED                [ 29%]
+tests/test_auth.py::test_dashboard_requires_auth FAILED                  [ 30%]
+tests/test_auth.py::test_dashboard_open_if_no_creds_configured FAILED    [ 32%]
+tests/test_dashboard.py::test_csv_endpoint_returns_csv PASSED            [ 33%]
+tests/test_dashboard.py::test_csv_endpoint_empty_db PASSED               [ 35%]
+tests/test_dashboard.py::test_dashboard_returns_html PASSED              [ 36%]
+tests/test_dashboard.py::test_dashboard_filter_nonexistent_estado PASSED [ 38%]
+tests/test_dashboard.py::test_dashboard_contains_export_link PASSED      [ 39%]
+tests/test_fsm.py::test_next_state_advances PASSED                       [ 41%]
+tests/test_fsm.py::test_should_finalize_on_invalid PASSED                [ 42%]
+tests/test_fsm.py::test_is_active_state PASSED                           [ 44%]
+tests/test_imap_listener.py::test_extract_lead_fields_basic PASSED       [ 45%]
+tests/test_imap_listener.py::test_extract_lead_fields_fallback_phone PASSED [ 47%]
+tests/test_imap_listener.py::test_extract_body_text_html_only PASSED     [ 48%]
+tests/test_imap_listener.py::test_extract_body_text_multipart_with_attachment PASSED [ 50%]
+tests/test_imap_listener.py::test_subject_matches_keyword PASSED         [ 51%]
+tests/test_lead_profile_builder.py::test_build_profile_from_answers_text PASSED [ 52%]
+tests/test_lead_profile_builder.py::test_score_from_answers_with_alias_keys PASSED [ 54%]
+tests/test_notifications.py::test_build_notification_text_gold_requires_calendly PASSED [ 55%]
+tests/test_notifications.py::test_build_notification_text_gold_includes_emoji_and_link PASSED [ 57%]
+tests/test_notifications.py::test_build_notification_text_silver_uses_agent PASSED [ 58%]
+tests/test_notifications.py::test_build_notification_text_red_requires_link PASSED [ 60%]
+tests/test_notifications.py::test_build_notification_text_red_includes_link_and_emoji PASSED [ 61%]
+tests/test_notifications.py::test_build_notification_text_unknown_label PASSED [ 63%]
+tests/test_scoring.py::test_compute_score_happy_path PASSED              [ 64%]
+tests/test_scoring.py::test_killer_ratio_esfuerzo PASSED                 [ 66%]
+tests/test_session_flow.py::test_advance_to_final_triggers_scoring PASSED [ 67%]
+tests/test_session_flow.py::test_finalize_session_propagates_correlation PASSED [ 69%]
+tests/test_session_scoring.py::test_score_session_persists_metadata PASSED [ 70%]
+tests/test_session_scoring.py::test_score_session_with_killers_and_finalize PASSED [ 72%]
+tests/test_validators.py::TestValidateBool::test_si_is_valid PASSED      [ 73%]
+tests/test_validators.py::TestValidateBool::test_si_without_accent_is_valid PASSED [ 75%]
+tests/test_validators.py::TestValidateBool::test_no_is_valid PASSED      [ 76%]
+tests/test_validators.py::TestValidateBool::test_claro_is_valid PASSED   [ 77%]
+tests/test_validators.py::TestValidateBool::test_nop_is_valid PASSED     [ 79%]
+tests/test_validators.py::TestValidateBool::test_ambiguous_is_invalid PASSED [ 80%]
+tests/test_validators.py::TestValidateBool::test_random_text_is_invalid_for_bool PASSED [ 82%]
+tests/test_validators.py::TestValidateNumber::test_pure_number_is_valid PASSED [ 83%]
+tests/test_validators.py::TestValidateNumber::test_number_with_text_is_valid PASSED [ 85%]
+tests/test_validators.py::TestValidateNumber::test_two_persons_is_valid PASSED [ 86%]
+tests/test_validators.py::TestValidateNumber::test_no_digits_is_invalid PASSED [ 88%]
+tests/test_validators.py::TestValidateText::test_any_text_is_valid PASSED [ 89%]
+tests/test_validators.py::TestValidateText::test_single_word_is_valid PASSED [ 91%]
+tests/test_validators.py::TestValidateEmpty::test_empty_string_is_invalid PASSED [ 92%]
+tests/test_validators.py::TestValidateEmpty::test_whitespace_only_is_invalid PASSED [ 94%]
+tests/test_validators.py::TestValidateEmpty::test_empty_number_is_invalid PASSED [ 95%]
+tests/test_webhook_handler.py::test_handle_inbound_message_advances_and_logs PASSED [ 97%]
+tests/test_webhook_handler.py::test_handle_inbound_message_idempotent_insert PASSED [ 98%]
+tests/test_webhook_handler.py::test_handle_inbound_message_invalid_bool_does_not_advance PASSED [100%]
+
+================================== FAILURES ===================================
+________________________ test_dashboard_requires_auth _________________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-34/test_dashboard_requires_auth0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B8CC1309E0>
+
+    def test_dashboard_requires_auth(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+    
+        # Init DB schema
+        conn = sqlite3.connect(str(db_path))
+        # minimal schema just to not fail on get_leads
+        conn.execute("CREATE TABLE leads (telefono TEXT PRIMARY KEY, nombre TEXT, origen TEXT, metadata TEXT, created_at INTEGER)")
+        # Added id column
+        conn.execute("CREATE TABLE sesiones_leads (id INTEGER PRIMARY KEY, telefono TEXT, estado_actual INTEGER, respuestas_clean TEXT, intentos_fallidos INTEGER, ultimo_mensaje_ts INTEGER, metadata TEXT, created_at INTEGER, updated_at INTEGER, scoring REAL, finalizado_en INTEGER)")
+        conn.commit()
+        conn.close()
+    
+        monkeypatch.setenv("DB_PATH", str(db_path))
+        monkeypatch.setenv("DASHBOARD_USERNAME", "admin")
+        monkeypatch.setenv("DASHBOARD_PASSWORD", "secret")
+    
+        client = TestClient(app)
+    
+        # 1. No credentials -> 401
+        response = client.get("/")
+        assert response.status_code == 401
+        assert "WWW-Authenticate" in response.headers
+        assert response.headers["WWW-Authenticate"] == "Basic"
+    
+        response = client.get("/api/dashboard-data")
+        assert response.status_code == 401
+    
+        # 2. Wrong credentials -> 401
+        response = client.get("/", auth=("admin", "wrong"))
+        assert response.status_code == 401
+    
+        # 3. Correct credentials -> 200
+>       response = client.get("/", auth=("admin", "secret"))
+
+tests\test_auth.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:518: in get
+    return super().get(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1053: in get
+    return self.request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:488: in request
+    return super().request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:381: in handle_request
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:378: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:321: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:252: in _call_func
+    retval = await retval_or_awaitable
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:187: in __call__
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:165: in __call__
+    await self.app(scope, receive, _send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\exceptions.py:62: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:715: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:735: in app
+    await route.handle(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:288: in handle
+    await self.app(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:76: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:73: in app
+    response = await f(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:301: in app
+    raw_response = await run_endpoint_function(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:214: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\concurrency.py:39: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\to_thread.py:56: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:2485: in run_sync_in_worker_thread
+    return await future
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:976: in run
+    result = context.run(func, *args)
+src\api.py:216: in dashboard
+    leads = get_leads(settings.db_path, estado)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+db_path = 'C:\\Users\\Personal\\AppData\\Local\\Temp\\pytest-of-Personal\\pytest-34\\test_dashboard_requires_auth0\\app.db'
+estado = None
+
+    def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
+        query = (
+            "SELECT id, telefono, nombre, origen, estado_actual, scoring, creado_en, "
+            "ultimo_mensaje_ts, respuestas_clean, metadata "
+            "FROM sesiones_leads"
+        )
+        params: list[object] = []
+        if estado:
+            try:
+                estado_value = int(estado)
+            except ValueError:
+                return []
+            query += " WHERE estado_actual = ?"
+            params.append(estado_value)
+        query += " ORDER BY id DESC"
+    
+        with db_session(db_path) as conn:
+>           rows = conn.execute(query, tuple(params)).fetchall()
+E           sqlite3.OperationalError: no such column: nombre
+
+src\services\dashboard_service.py:32: OperationalError
+_________________ test_dashboard_open_if_no_creds_configured __________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-34/test_dashboard_open_if_no_cred0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B8CC0D3770>
+
+    def test_dashboard_open_if_no_creds_configured(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+            # Init DB schema
+        conn = sqlite3.connect(str(db_path))
+        # minimal schema just to not fail on get_leads
+        conn.execute("CREATE TABLE leads (telefono TEXT PRIMARY KEY, nombre TEXT, origen TEXT, metadata TEXT, created_at INTEGER)")
+        # Added id column
+        conn.execute("CREATE TABLE sesiones_leads (id INTEGER PRIMARY KEY, telefono TEXT, estado_actual INTEGER, respuestas_clean TEXT, intentos_fallidos INTEGER, ultimo_mensaje_ts INTEGER, metadata TEXT, created_at INTEGER, updated_at INTEGER, scoring REAL, finalizado_en INTEGER)")
+        conn.commit()
+        conn.close()
+    
+        monkeypatch.setenv("DB_PATH", str(db_path))
+        monkeypatch.delenv("DASHBOARD_USERNAME", raising=False)
+        monkeypatch.delenv("DASHBOARD_PASSWORD", raising=False)
+    
+        client = TestClient(app)
+    
+        # Should allow access as "admin"
+>       response = client.get("/")
+
+tests\test_auth.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:518: in get
+    return super().get(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1053: in get
+    return self.request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:488: in request
+    return super().request(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:381: in handle_request
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\testclient.py:378: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:321: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\from_thread.py:252: in _call_func
+    retval = await retval_or_awaitable
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:187: in __call__
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\errors.py:165: in __call__
+    await self.app(scope, receive, _send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\middleware\exceptions.py:62: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:715: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:735: in app
+    await route.handle(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:288: in handle
+    await self.app(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:76: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:62: in wrapped_app
+    raise exc
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\_exception_handler.py:51: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\routing.py:73: in app
+    response = await f(request)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:301: in app
+    raw_response = await run_endpoint_function(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\fastapi\routing.py:214: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\concurrency.py:39: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\to_thread.py:56: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:2485: in run_sync_in_worker_thread
+    return await future
+C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\anyio\_backends\_asyncio.py:976: in run
+    result = context.run(func, *args)
+src\api.py:216: in dashboard
+    leads = get_leads(settings.db_path, estado)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+db_path = 'C:\\Users\\Personal\\AppData\\Local\\Temp\\pytest-of-Personal\\pytest-34\\test_dashboard_open_if_no_cred0\\app.db'
+estado = None
+
+    def get_leads(db_path: str, estado: str | None = None) -> list[dict]:
+        query = (
+            "SELECT id, telefono, nombre, origen, estado_actual, scoring, creado_en, "
+            "ultimo_mensaje_ts, respuestas_clean, metadata "
+            "FROM sesiones_leads"
+        )
+        params: list[object] = []
+        if estado:
+            try:
+                estado_value = int(estado)
+            except ValueError:
+                return []
+            query += " WHERE estado_actual = ?"
+            params.append(estado_value)
+        query += " ORDER BY id DESC"
+    
+        with db_session(db_path) as conn:
+>           rows = conn.execute(query, tuple(params)).fetchall()
+E           sqlite3.OperationalError: no such column: nombre
+
+src\services\dashboard_service.py:32: OperationalError
+============================== warnings summary ===============================
+..\..\..\..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\formparsers.py:12
+  C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+tests/test_dashboard.py::test_dashboard_returns_html
+tests/test_dashboard.py::test_dashboard_filter_nonexistent_estado
+tests/test_dashboard.py::test_dashboard_contains_export_link
+  C:\Users\Personal\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\starlette\templating.py:161: DeprecationWarning: The `name` is not the first parameter anymore. The first parameter should be the `Request` instance.
+  Replace `TemplateResponse(name, {"request": request})` by `TemplateResponse(request, name)`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_auth.py::test_dashboard_requires_auth - sqlite3.OperationalError: no such column: nombre
+FAILED tests/test_auth.py::test_dashboard_open_if_no_creds_configured - sqlite3.OperationalError: no such column: nombre
+================== 2 failed, 66 passed, 4 warnings in 17.35s ==================

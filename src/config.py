@@ -28,10 +28,15 @@ class BaseSettings:
     waha_base_url: str
     waha_api_key: str | None
     waha_session: str
-    agent_name: str | None
-    calendly_url: str | None
-    red_info_url: str | None
-    export_api_key: str | None
+    agent_name: str | None = None
+    calendly_url: str | None = None
+    red_info_url: str | None = None
+    imap_label_error: str | None = None
+    leads_api_url: str | None = None
+    imap_poll_seconds: int = 30
+    export_api_key: str | None = None
+    dashboard_username: str | None = None
+    dashboard_password: str | None = None
 
 
 @dataclass(frozen=True)
@@ -50,6 +55,8 @@ def load_base_settings() -> BaseSettings:
     calendly_url = _get_env_str("CALENDLY_URL")
     red_info_url = _get_env_str("RED_INFO_URL")
     export_api_key = _get_env_str("EXPORT_API_KEY")
+    dashboard_username = _get_env_str("DASHBOARD_USERNAME")
+    dashboard_password = _get_env_str("DASHBOARD_PASSWORD")
     return BaseSettings(
         db_path=db_path,
         waha_base_url=waha_base_url,
@@ -59,6 +66,8 @@ def load_base_settings() -> BaseSettings:
         calendly_url=calendly_url,
         red_info_url=red_info_url,
         export_api_key=export_api_key,
+        dashboard_username=dashboard_username,
+        dashboard_password=dashboard_password,
     )
 
 

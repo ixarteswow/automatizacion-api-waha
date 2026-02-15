@@ -1,0 +1,98 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.3.3, pluggy-1.6.0 -- C:\Users\Personal\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Personal\Documents\PROGRAMACION\docker-uses\proyectos\proyecto-automatizacion\whatsapp-auto-python-codex
+configfile: pytest.ini
+plugins: anyio-4.11.0
+collecting ... collected 3 items
+
+tests/test_webhook_handler.py::test_handle_inbound_message_advances_and_logs FAILED [ 33%]
+tests/test_webhook_handler.py::test_handle_inbound_message_idempotent_insert PASSED [ 66%]
+tests/test_webhook_handler.py::test_handle_inbound_message_invalid_bool_does_not_advance PASSED [100%]
+
+================================== FAILURES ===================================
+________________ test_handle_inbound_message_advances_and_logs ________________
+
+tmp_path = WindowsPath('C:/Users/Personal/AppData/Local/Temp/pytest-of-Personal/pytest-30/test_handle_inbound_message_ad0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001DF8F5C8EC0>
+
+    def test_handle_inbound_message_advances_and_logs(tmp_path, monkeypatch):
+        db_path = tmp_path / "app.db"
+        _init_db(db_path)
+        monkeypatch.setenv("PROPERTY_RENT_EUR", "700")
+        monkeypatch.setenv("PROPERTY_SQM", "60")
+        monkeypatch.setenv("DISABLE_OUTBOUND_MESSAGES", "1")
+    
+        telefono = "+34600000005"
+        conn = sqlite3.connect(str(db_path))
+        try:
+            _insert_session(conn, telefono, fsm.MAX_STATE)
+            conn.execute(
+                "UPDATE sesiones_leads SET respuestas_clean = ? WHERE telefono = ?",
+                (
+                    json.dumps(
+                        {
+                            "p1": "No mascotas",
+                            "p2": "no",
+                            "p3": "2",
+                            "p4": "Temporal 2 meses",
+                            "p5": "it",
+                            "p6": "1200",
+                        },
+                        ensure_ascii=True,
+                    ),
+                    telefono,
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    
+>       result = handle_inbound_message(
+            str(db_path),
+            message_id="waha-msg-1",
+            telefono=telefono,
+            text="1200",
+        )
+
+tests\test_webhook_handler.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\services\webhook_handler.py:90: in handle_inbound_message
+    new_state = advance_on_valid_answer(
+src\services\session_flow.py:60: in advance_on_valid_answer
+    score_session(db_path, telefono, finalize=True, correlation_id=correlation_id)
+src\services\session_scoring.py:104: in score_session
+    _maybe_send_notification(db_path, telefono, result, correlation_id=correlation_id)
+src\services\session_scoring.py:116: in _maybe_send_notification
+    settings = load_base_settings()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def load_base_settings() -> BaseSettings:
+        db_path = _get_env_str("DB_PATH", "data/app.db") or "data/app.db"
+        waha_base_url = _get_env_str("WAHA_BASE_URL", "http://waha:3000") or "http://waha:3000"
+        waha_api_key = _get_env_str("WAHA_API_KEY")
+        waha_session = _get_env_str("WAHA_SESSION", "default") or "default"
+        agent_name = _get_env_str("AGENT_NAME")
+        calendly_url = _get_env_str("CALENDLY_URL")
+        red_info_url = _get_env_str("RED_INFO_URL")
+        export_api_key = _get_env_str("EXPORT_API_KEY")
+        dashboard_username = _get_env_str("DASHBOARD_USERNAME")
+        dashboard_password = _get_env_str("DASHBOARD_PASSWORD")
+>       return BaseSettings(
+            db_path=db_path,
+            waha_base_url=waha_base_url,
+            waha_api_key=waha_api_key,
+            waha_session=waha_session,
+            agent_name=agent_name,
+            calendly_url=calendly_url,
+            red_info_url=red_info_url,
+            export_api_key=export_api_key,
+            dashboard_username=dashboard_username,
+            dashboard_password=dashboard_password,
+        )
+E       TypeError: BaseSettings.__init__() got an unexpected keyword argument 'agent_name'
+
+src\config.py:57: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_webhook_handler.py::test_handle_inbound_message_advances_and_logs - TypeError: BaseSettings.__init__() got an unexpected keyword argument 'agent_name'
+========================= 1 failed, 2 passed in 0.97s =========================
